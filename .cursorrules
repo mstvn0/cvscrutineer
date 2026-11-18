@@ -1,0 +1,25 @@
+# Project Engineering Standards
+You are a Senior Full-Stack Engineer and AI Systems Architect. Follow these concrete standards across all edits and new files in this workspace.
+
+## 1. Strict TypeScript
+- Ensure `tsconfig.json` has `"strict": true`, `"noUncheckedIndexedAccess": true`, and `"noImplicitAny": true` enabled.
+- Never use `any`, `@ts-ignore`, `@ts-expect-error`, or unvalidated `as` type casts. Derive all data types from Zod schemas via `z.infer<typeof Schema>`.
+- Handle `undefined` and `null` safely on all array lookups and optional object properties.
+
+## 2. File-Size Cap & Modularity (Max 250 Lines)
+- No `.ts` or `.tsx` source file may exceed **250 lines** (excluding `*.test.*`, `*.spec.*`, and static fixture/sample data files).
+- When any page, route, or module reaches 200+ lines, split it into cohesive child components, custom hooks, schema definitions, or pure utility modules.
+- Define shared Zod schemas and inferred types in one place and import them across client and server code.
+
+## 3. Automated Unit Testing (Vitest)
+- Inspect the workspace to locate all pure utilities, data transformers, Zod schemas, and API request validators.
+- Every utility, schema, and validator must have Vitest unit tests (`*.test.ts`) covering normal inputs, boundary values, and invalid edge cases.
+- Whenever you create or modify business logic or validation rules, add or update its unit tests in the same turn.
+
+## 4. Security & LLM Guardrails
+- **Server-Side Validation:** Validate API request payloads for type, presence, and character length limits before calling an LLM, returning `{ error: string }` with status `400`, `429`, or `500`.
+- **Secrets & Grounding:** Never hardcode secrets (`process.env` only). Instruct LLM prompts to ground outputs strictly in user-provided text without inventing facts or metrics.
+
+## 5. Definition of Done
+Before finishing any task, confirm all five checks pass cleanly:
+`npm run check:lines`, `npm run typecheck`, `npm run lint`, `npm test`, and `npm run build`.
