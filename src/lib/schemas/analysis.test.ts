@@ -16,6 +16,7 @@ const validFindings = {
       category: 'Core Tech / Domain' as const,
       status: 'warning' as const,
       evidenceOrGap: 'Resume lists "JS/TS" but never spells TypeScript',
+      fixItSuggestion: null,
     },
   ],
   semanticDriftAudit: [
@@ -23,6 +24,8 @@ const validFindings = {
       resumeSectionOrRole: 'Store Manager — Harbor & Pine Outfitters',
       driftDiagnosis: 'Diluting Vector' as const,
       actionAdvice: 'Compress/Delete to a single line or remove entirely',
+      fixItSuggestion:
+        'Collapse the retail role to one line under Earlier Experience; keep only transferable ops verbs already on the resume.',
     },
   ],
   recruiterSearchQueries: [
@@ -50,6 +53,43 @@ const validAnalysis = {
 describe('AnalysisFindingsSchema', () => {
   it('parses findings without scores or rewrites', () => {
     expect(AnalysisFindingsSchema.safeParse(validFindings).success).toBe(true);
+  });
+
+  it('accepts grounded fixItSuggestion on failed knockouts', () => {
+    const firstRule = validFindings.knockoutRules[0];
+    expect(firstRule).toBeDefined();
+    if (!firstRule) return;
+
+    const parsed = AnalysisFindingsSchema.safeParse({
+      ...validFindings,
+      knockoutRules: [
+        {
+          ...firstRule,
+          status: 'failed',
+          fixItSuggestion:
+            'In Skills, replace "JS/TS" with the exact JD term "TypeScript" already implied by your stack.',
+        },
+      ],
+    });
+    expect(parsed.success).toBe(true);
+  });
+
+  it('rejects missing fixItSuggestion fields', () => {
+    const firstRule = validFindings.knockoutRules[0];
+    expect(firstRule).toBeDefined();
+    if (!firstRule) return;
+
+    const withoutTip = {
+      rule: firstRule.rule,
+      category: firstRule.category,
+      status: firstRule.status,
+      evidenceOrGap: firstRule.evidenceOrGap,
+    };
+    const parsed = AnalysisFindingsSchema.safeParse({
+      ...validFindings,
+      knockoutRules: [withoutTip],
+    });
+    expect(parsed.success).toBe(false);
   });
 
   it('rejects invalid driftDiagnosis', () => {

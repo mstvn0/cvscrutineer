@@ -19,6 +19,7 @@ function baseFindings(
         category: 'Core Tech / Domain',
         status: 'met',
         evidenceOrGap: 'Lists TypeScript',
+        fixItSuggestion: null,
       },
     ],
     semanticDriftAudit: [
@@ -26,6 +27,7 @@ function baseFindings(
         resumeSectionOrRole: 'Frontend Engineer',
         driftDiagnosis: 'High Signal',
         actionAdvice: 'Keep concise',
+        fixItSuggestion: null,
       },
     ],
     recruiterSearchQueries: [
@@ -58,12 +60,15 @@ describe('deriveVerdict', () => {
             category: 'Core Tech / Domain',
             status: 'failed',
             evidenceOrGap: 'No SQL mentioned',
+            fixItSuggestion:
+              'Add the JD keyword SQL next to your existing analytics tooling line if that work used SQL.',
           },
           {
             rule: '4+ years PM',
             category: 'Experience & Seniority',
             status: 'warning',
             evidenceOrGap: 'Dates ambiguous',
+            fixItSuggestion: null,
           },
         ],
         semanticDriftAudit: [
@@ -71,6 +76,8 @@ describe('deriveVerdict', () => {
             resumeSectionOrRole: 'Retail',
             driftDiagnosis: 'Diluting Vector',
             actionAdvice: 'Delete',
+            fixItSuggestion:
+              'Move retail to a one-line Earlier Experience entry using only titles already listed.',
           },
         ],
         recruiterSearchQueries: [
@@ -99,6 +106,7 @@ describe('deriveVerdict', () => {
             category: 'Core Tech / Domain',
             status: 'warning',
             evidenceOrGap: 'Only JS/TS acronym',
+            fixItSuggestion: null,
           },
         ],
       }),
@@ -115,6 +123,8 @@ describe('deriveVerdict', () => {
             resumeSectionOrRole: 'WordPress freelance',
             driftDiagnosis: 'Diluting Vector',
             actionAdvice: 'Compress/Delete',
+            fixItSuggestion:
+              'Compress freelance WordPress work to a single bullet under side projects.',
           },
         ],
       }),

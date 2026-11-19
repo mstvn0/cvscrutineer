@@ -43,6 +43,12 @@ export const AnalysisFindingsSchema = z.object({
         .describe(
           'Exact quote or reason why the resume passes or triggers auto-rejection',
         ),
+      fixItSuggestion: z
+        .string()
+        .nullable()
+        .describe(
+          'When status is failed: one short grounded tip (phrase swap or where to add the missing keyword) using only resume/JD text. Null for met/warning. Never invent skills, employers, or metrics.',
+        ),
     }),
   ),
   semanticDriftAudit: z.array(
@@ -55,6 +61,12 @@ export const AnalysisFindingsSchema = z.object({
         .string()
         .describe(
           'Concrete instruction: Expand metrics, Keep concise, or Compress/Delete to stop dragging down semantic relevance',
+        ),
+      fixItSuggestion: z
+        .string()
+        .nullable()
+        .describe(
+          'When Diluting Vector: one short grounded tip to compress, reframe, or relocate existing resume text only. Null for High Signal/Neutral. Never invent new experience.',
         ),
     }),
   ),

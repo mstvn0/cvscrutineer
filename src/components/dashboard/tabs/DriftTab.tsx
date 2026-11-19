@@ -1,5 +1,6 @@
 'use client';
 
+import { FixItTip } from '@/components/dashboard/FixItTip';
 import type { AnalysisResult } from '@/lib/schemas/analysis';
 
 type Row = AnalysisResult['semanticDriftAudit'][number];
@@ -41,6 +42,11 @@ export function DriftTab({
     <ul className="space-y-3">
       {rows.map((row, index) => {
         const styles = DIAGNOSIS_STYLES[row.driftDiagnosis];
+        const showFixIt =
+          row.driftDiagnosis === 'Diluting Vector' &&
+          row.fixItSuggestion !== null &&
+          row.fixItSuggestion.trim().length > 0;
+
         return (
           <li
             key={`${row.resumeSectionOrRole}-${index}`}
@@ -70,6 +76,12 @@ export function DriftTab({
             <p className="mt-3 text-sm leading-relaxed text-zinc-400">
               {row.actionAdvice}
             </p>
+            {showFixIt && row.fixItSuggestion ? (
+              <FixItTip
+                suggestion={row.fixItSuggestion}
+                copyKey={`drift-${index}`}
+              />
+            ) : null}
           </li>
         );
       })}

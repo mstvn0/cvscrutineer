@@ -1,6 +1,7 @@
 'use client';
 
 import { AlertTriangle, CheckCircle2, XCircle } from 'lucide-react';
+import { FixItTip } from '@/components/dashboard/FixItTip';
 import type { AnalysisResult } from '@/lib/schemas/analysis';
 
 type Rule = AnalysisResult['knockoutRules'][number];
@@ -36,6 +37,11 @@ export function KnockoutTab({ rules }: { rules: AnalysisResult['knockoutRules'] 
       {rules.map((rule, index) => {
         const ui = STATUS_UI[rule.status];
         const Icon = ui.icon;
+        const showFixIt =
+          rule.status === 'failed' &&
+          rule.fixItSuggestion !== null &&
+          rule.fixItSuggestion.trim().length > 0;
+
         return (
           <li
             key={`${rule.rule}-${index}`}
@@ -60,6 +66,12 @@ export function KnockoutTab({ rules }: { rules: AnalysisResult['knockoutRules'] 
             <p className="mt-2 text-sm leading-relaxed text-zinc-400">
               {rule.evidenceOrGap}
             </p>
+            {showFixIt && rule.fixItSuggestion ? (
+              <FixItTip
+                suggestion={rule.fixItSuggestion}
+                copyKey={`knockout-${index}`}
+              />
+            ) : null}
           </li>
         );
       })}
