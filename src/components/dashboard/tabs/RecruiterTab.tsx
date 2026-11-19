@@ -3,22 +3,40 @@
 import { useState } from 'react';
 import { Check, Copy, FilterX, ListChecks } from 'lucide-react';
 import { copyToClipboard } from '@/lib/clipboard';
+import type { RecruiterFocus } from '@/lib/dashboardNavigation';
 import type { AnalysisResult } from '@/lib/schemas/analysis';
 
 export function RecruiterTab({
   queries,
+  focus = 'all',
 }: {
   queries: AnalysisResult['recruiterSearchQueries'];
+  focus?: RecruiterFocus;
 }) {
   const [copiedTerm, setCopiedTerm] = useState<string | null>(null);
 
   if (queries.length === 0) {
-    return <p className="text-sm text-zinc-500">No recruiter queries simulated.</p>;
+    return (
+      <p className="text-sm text-zinc-500">No recruiter queries simulated.</p>
+    );
+  }
+
+  const visible =
+    focus === 'misses'
+      ? queries.filter((query) => !query.wouldAppearOnPage1)
+      : queries;
+
+  if (visible.length === 0) {
+    return (
+      <p className="text-sm text-zinc-500">
+        No Boolean misses match this filter.
+      </p>
+    );
   }
 
   return (
     <ul className="space-y-3">
-      {queries.map((query, index) => {
+      {visible.map((query, index) => {
         const onPage1 = query.wouldAppearOnPage1;
         return (
           <li
@@ -51,14 +69,15 @@ export function RecruiterTab({
               <div className="border-t border-zinc-800/80 px-3 py-2">
                 <button
                   type="button"
-                  onClick={async () => {
-                    const ok = await copyToClipboard(
-                      query.missingExactTerm ?? '',
-                    );
-                    if (ok) {
+                  onClick={() => {
+                    void (async () => {
+                      const ok = await copyToClipboard(
+                        query.missingExactTerm ?? '',
+                      );
+                      if (!ok) return;
                       setCopiedTerm(query.missingExactTerm);
                       window.setTimeout(() => setCopiedTerm(null), 1500);
-                    }
+                    })();
                   }}
                   className="inline-flex items-center gap-1.5 rounded-full border border-amber-500/30 bg-amber-500/10 px-2.5 py-1 text-xs font-medium text-amber-200 transition hover:bg-amber-500/20 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-amber-400"
                 >

@@ -53,10 +53,10 @@ export function CvScrutineerApp() {
   }
 
   return (
-    <div className="flex min-h-full flex-1 flex-col bg-zinc-950 text-zinc-100">
+    <div className="flex h-full min-h-0 flex-1 flex-col bg-zinc-950 text-zinc-100">
       <Navbar />
-      <div className="mx-auto grid w-full max-w-[1600px] flex-1 lg:grid-cols-[42%_58%] lg:overflow-hidden">
-        <div className="min-h-[520px] lg:min-h-0 lg:overflow-y-auto">
+      <div className="mx-auto grid w-full max-w-[1600px] min-h-0 flex-1 overflow-y-auto lg:grid-cols-[42%_58%] lg:grid-rows-[minmax(0,1fr)] lg:overflow-hidden">
+        <div className="min-h-[50vh] overflow-y-auto lg:min-h-0">
           <InputWorkspace
             resume={resume}
             jobDescription={jobDescription}
@@ -73,7 +73,7 @@ export function CvScrutineerApp() {
           />
         </div>
         <section
-          className="min-h-[520px] bg-[#09090b] lg:min-h-0 lg:overflow-hidden"
+          className="min-h-[50vh] overflow-hidden bg-[#09090b] lg:min-h-0"
           aria-label="Forensics dashboard"
         >
           {status === 'idle' || status === 'error' ? (

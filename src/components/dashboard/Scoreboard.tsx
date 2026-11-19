@@ -1,20 +1,22 @@
 'use client';
 
 import { AlertTriangle } from 'lucide-react';
+import type { GateMetricKey } from '@/lib/dashboardNavigation';
 import type { AnalysisResult } from '@/lib/schemas/analysis';
 import { VerdictPanel } from './VerdictPanel';
 
 type ScoreboardProps = {
   analysis: AnalysisResult;
+  onGateNavigate?: (key: GateMetricKey) => void;
 };
 
-export function Scoreboard({ analysis }: ScoreboardProps) {
+export function Scoreboard({ analysis, onGateNavigate }: ScoreboardProps) {
   const { atsParsedProfile, executiveSummary } = analysis;
 
   return (
     <div className="space-y-4">
       <div className="grid gap-4 lg:grid-cols-[minmax(0,1.1fr)_minmax(0,1fr)]">
-        <VerdictPanel analysis={analysis} />
+        <VerdictPanel analysis={analysis} onGateNavigate={onGateNavigate} />
         <div className="rounded-xl border border-zinc-800 bg-zinc-900/60 p-4">
           <p className="text-xs font-medium uppercase tracking-wider text-zinc-500">
             Executive diagnosis

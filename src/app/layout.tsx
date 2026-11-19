@@ -25,7 +25,7 @@ export default function RootLayout({ children }: LayoutProps<'/'>) {
       lang="en"
       className={`${outfit.variable} ${ibmPlexMono.variable} h-full antialiased`}
     >
-      <body className="min-h-full flex flex-col bg-zinc-950 text-zinc-100">
+      <body className="flex h-full min-h-0 flex-col overflow-hidden bg-zinc-950 text-zinc-100">
         {children}
       </body>
     </html>

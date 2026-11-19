@@ -1,10 +1,12 @@
 'use client';
 
+import type { GateMetricKey } from '@/lib/dashboardNavigation';
 import type { AnalysisResult } from '@/lib/schemas/analysis';
 import { KnockoutStatusPill } from './KnockoutStatusPill';
 
 type VerdictPanelProps = {
   analysis: AnalysisResult;
+  onGateNavigate?: (key: GateMetricKey) => void;
 };
 
 const CRITERIA = [
@@ -30,7 +32,7 @@ const CRITERIA = [
   },
 ] as const;
 
-export function VerdictPanel({ analysis }: VerdictPanelProps) {
+export function VerdictPanel({ analysis, onGateNavigate }: VerdictPanelProps) {
   const { knockoutStatus, verdictBreakdown } = analysis;
 
   return (
@@ -46,7 +48,11 @@ export function VerdictPanel({ analysis }: VerdictPanelProps) {
         {verdictBreakdown.classificationRule}
       </p>
 
-      <dl className="mt-4 grid grid-cols-2 gap-2 sm:grid-cols-4">
+      <div
+        className="mt-4 grid grid-cols-2 gap-2 sm:grid-cols-4 sm:items-stretch"
+        role="list"
+        aria-label="Gate metric counts"
+      >
         {CRITERIA.map((item) => {
           const value = verdictBreakdown[item.key];
           const hot = value > 0;
@@ -55,22 +61,36 @@ export function VerdictPanel({ analysis }: VerdictPanelProps) {
             : item.failTone
               ? 'border-rose-500/30 bg-rose-500/10 text-rose-200'
               : 'border-amber-500/30 bg-amber-500/10 text-amber-200';
-
-          return (
-            <div
-              key={item.key}
-              className={`rounded-xl border px-3 py-2 ${tone}`}
-            >
-              <dt className="text-[10px] uppercase tracking-wider opacity-80">
+          const className = `flex h-full min-h-[4.75rem] w-full flex-col rounded-xl border px-3 py-2.5 text-left ${tone}`;
+          const body = (
+            <>
+              <span className="font-mono text-2xl font-semibold leading-none tracking-tight tabular-nums">
+                {value.toLocaleString()}
+              </span>
+              <span className="mt-2 min-h-[2.25rem] text-[10px] font-medium uppercase leading-snug tracking-wider opacity-80">
                 {item.label}
-              </dt>
-              <dd className="mt-1 font-display text-xl font-semibold tabular-nums">
-                {value}
-              </dd>
+              </span>
+            </>
+          );
+
+          return hot && onGateNavigate ? (
+            <button
+              key={item.key}
+              type="button"
+              role="listitem"
+              onClick={() => onGateNavigate(item.key)}
+              className={`${className} cursor-pointer transition hover:brightness-110 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-400`}
+              aria-label={`Show ${item.label.toLowerCase()} in results`}
+            >
+              {body}
+            </button>
+          ) : (
+            <div key={item.key} role="listitem" className={className}>
+              {body}
             </div>
           );
         })}
-      </dl>
+      </div>
 
       <ol className="mt-4 space-y-1.5 text-[11px] leading-relaxed text-zinc-500">
         <li>

@@ -1,6 +1,8 @@
 'use client';
 
+import { CollapsedNoiseSection } from '@/components/dashboard/CollapsedNoiseSection';
 import { FixItTip } from '@/components/dashboard/FixItTip';
+import type { DriftFocus } from '@/lib/dashboardNavigation';
 import type { AnalysisResult } from '@/lib/schemas/analysis';
 
 type Row = AnalysisResult['semanticDriftAudit'][number];
@@ -31,60 +33,102 @@ const DIAGNOSIS_STYLES: Record<
 
 export function DriftTab({
   rows,
+  focus = 'all',
 }: {
   rows: AnalysisResult['semanticDriftAudit'];
+  focus?: DriftFocus;
 }) {
   if (rows.length === 0) {
     return <p className="text-sm text-zinc-500">No sections audited.</p>;
   }
 
-  return (
-    <ul className="space-y-3">
-      {rows.map((row, index) => {
-        const styles = DIAGNOSIS_STYLES[row.driftDiagnosis];
-        const showFixIt =
-          row.driftDiagnosis === 'Diluting Vector' &&
-          row.fixItSuggestion !== null &&
-          row.fixItSuggestion.trim().length > 0;
+  const diluting = rows.filter(
+    (row) => row.driftDiagnosis === 'Diluting Vector',
+  );
+  const neutral = rows.filter((row) => row.driftDiagnosis === 'Neutral');
+  const highSignal = rows.filter(
+    (row) => row.driftDiagnosis === 'High Signal',
+  );
 
-        return (
-          <li
+  const priority = focus === 'diluting' ? diluting : [...diluting, ...neutral];
+  const showHighSignal = focus === 'all';
+
+  if (priority.length === 0 && !(showHighSignal && highSignal.length > 0)) {
+    return (
+      <p className="text-sm text-zinc-500">No drift rows match this filter.</p>
+    );
+  }
+
+  return (
+    <div className="space-y-3">
+      <ul className="space-y-3">
+        {priority.map((row, index) => (
+          <DriftRow
             key={`${row.resumeSectionOrRole}-${index}`}
-            className="rounded-xl border border-zinc-800 bg-zinc-900/50 p-4"
-          >
-            <div className="flex flex-wrap items-center justify-between gap-2">
-              <p className="text-sm font-semibold text-zinc-100">
-                {row.resumeSectionOrRole}
-              </p>
-              <span
-                className={`rounded-full border px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide ${styles.badge}`}
-              >
-                {row.driftDiagnosis}
-              </span>
-            </div>
-            <div className="mt-3">
-              <div className="mb-1 flex justify-between text-[11px] text-zinc-500">
-                <span>Signal band</span>
-                <span>{styles.label}</span>
-              </div>
-              <div className="h-2 overflow-hidden rounded-full bg-zinc-800">
-                <div
-                  className={`h-full rounded-full ${styles.fill} ${styles.width}`}
-                />
-              </div>
-            </div>
-            <p className="mt-3 text-sm leading-relaxed text-zinc-400">
-              {row.actionAdvice}
-            </p>
-            {showFixIt && row.fixItSuggestion ? (
-              <FixItTip
-                suggestion={row.fixItSuggestion}
-                copyKey={`drift-${index}`}
+            row={row}
+            index={index}
+          />
+        ))}
+      </ul>
+      {showHighSignal ? (
+        <CollapsedNoiseSection
+          label="High Signal sections"
+          count={highSignal.length}
+        >
+          <ul className="space-y-3">
+            {highSignal.map((row, index) => (
+              <DriftRow
+                key={`${row.resumeSectionOrRole}-hs-${index}`}
+                row={row}
+                index={index + 1000}
               />
-            ) : null}
-          </li>
-        );
-      })}
-    </ul>
+            ))}
+          </ul>
+        </CollapsedNoiseSection>
+      ) : null}
+    </div>
+  );
+}
+
+function DriftRow({ row, index }: { row: Row; index: number }) {
+  const styles = DIAGNOSIS_STYLES[row.driftDiagnosis];
+  const showFixIt =
+    row.driftDiagnosis === 'Diluting Vector' &&
+    row.fixItSuggestion !== null &&
+    row.fixItSuggestion.trim().length > 0;
+
+  return (
+    <li className="rounded-xl border border-zinc-800 bg-zinc-900/50 p-4">
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <p className="text-sm font-semibold text-zinc-100">
+          {row.resumeSectionOrRole}
+        </p>
+        <span
+          className={`rounded-full border px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide ${styles.badge}`}
+        >
+          {row.driftDiagnosis}
+        </span>
+      </div>
+      <div className="mt-3">
+        <div className="mb-1 flex justify-between text-[11px] text-zinc-500">
+          <span>Signal band</span>
+          <span>{styles.label}</span>
+        </div>
+        <div className="h-2 overflow-hidden rounded-full bg-zinc-800">
+          <div
+            className={`h-full rounded-full ${styles.fill} ${styles.width}`}
+          />
+        </div>
+      </div>
+      <p className="mt-3 text-sm leading-relaxed text-zinc-400">
+        {row.actionAdvice}
+      </p>
+      {showFixIt && row.fixItSuggestion ? (
+        <FixItTip
+          suggestion={row.fixItSuggestion}
+          copyKey={`drift-${index}`}
+        />
+      ) : null}
+    </li>
   );
 }

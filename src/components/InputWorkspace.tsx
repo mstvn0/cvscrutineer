@@ -97,7 +97,7 @@ export function InputWorkspace({
           disabled={isLoading}
           spellCheck={false}
           placeholder="Paste your resume text…"
-          className="min-h-[180px] flex-1 resize-y rounded-xl border border-zinc-800 bg-zinc-900/80 p-3 font-mono text-sm leading-relaxed text-zinc-100 placeholder:text-zinc-600 focus:border-emerald-500/50 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 disabled:opacity-60 lg:min-h-0"
+          className="min-h-[180px] flex-1 resize-none rounded-xl border border-zinc-800 bg-zinc-900/80 p-3 font-mono text-sm leading-relaxed text-zinc-100 placeholder:text-zinc-600 focus:border-emerald-500/50 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 disabled:opacity-60 lg:min-h-0"
         />
       </label>
 
@@ -115,7 +115,7 @@ export function InputWorkspace({
           disabled={isLoading}
           spellCheck={false}
           placeholder="Paste the target job description…"
-          className="min-h-[160px] flex-1 resize-y rounded-xl border border-zinc-800 bg-zinc-900/80 p-3 font-mono text-sm leading-relaxed text-zinc-100 placeholder:text-zinc-600 focus:border-emerald-500/50 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 disabled:opacity-60 lg:min-h-0"
+          className="min-h-[160px] flex-1 resize-none rounded-xl border border-zinc-800 bg-zinc-900/80 p-3 font-mono text-sm leading-relaxed text-zinc-100 placeholder:text-zinc-600 focus:border-emerald-500/50 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 disabled:opacity-60 lg:min-h-0"
         />
       </label>
 
