@@ -60,8 +60,11 @@ describe('deriveVerdict', () => {
             category: 'Core Tech / Domain',
             status: 'failed',
             evidenceOrGap: 'No SQL mentioned',
-            fixItSuggestion:
-              'Add the JD keyword SQL next to your existing analytics tooling line if that work used SQL.',
+            fixItSuggestion: {
+              advice:
+                'Add the JD keyword SQL beside analytics tooling already listed on the resume.',
+              draftText: 'Analytics tooling (SQL)',
+            },
           },
           {
             rule: '4+ years PM',
@@ -75,9 +78,13 @@ describe('deriveVerdict', () => {
           {
             resumeSectionOrRole: 'Retail',
             driftDiagnosis: 'Diluting Vector',
-            actionAdvice: 'Delete',
-            fixItSuggestion:
-              'Move retail to a one-line Earlier Experience entry using only titles already listed.',
+            actionAdvice: 'Reword with JD terms else remove',
+            fixItSuggestion: {
+              advice:
+                'Collapse the Harbor & Pine retail role to one Earlier Experience line using its existing title and team size.',
+              draftText:
+                'Earlier Experience: Store Manager — Harbor & Pine Outfitters (22-person team; inventory ops).',
+            },
           },
         ],
         recruiterSearchQueries: [
@@ -122,9 +129,12 @@ describe('deriveVerdict', () => {
           {
             resumeSectionOrRole: 'WordPress freelance',
             driftDiagnosis: 'Diluting Vector',
-            actionAdvice: 'Compress/Delete',
-            fixItSuggestion:
-              'Compress freelance WordPress work to a single bullet under side projects.',
+            actionAdvice: 'Reword with JD terms else remove',
+            fixItSuggestion: {
+              advice:
+                'No salvageable JD overlap in the WordPress brochure work — remove those bullets.',
+              draftText: null,
+            },
           },
         ],
       }),

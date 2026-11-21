@@ -95,3 +95,29 @@ export function navigationFromGate(key: GateMetricKey): {
       };
   }
 }
+
+/**
+ * Human label when a gate metric has narrowed the results list.
+ * Returns null when showing the unfiltered tab contents.
+ */
+export function activeFocusLabel(params: {
+  tab: DashboardTabId;
+  knockoutFocus: KnockoutFocus;
+  driftFocus: DriftFocus;
+  recruiterFocus: RecruiterFocus;
+}): string | null {
+  const { tab, knockoutFocus, driftFocus, recruiterFocus } = params;
+  if (tab === 'knockouts' && knockoutFocus === 'failed') {
+    return 'Showing failed knockouts only';
+  }
+  if (tab === 'knockouts' && knockoutFocus === 'warning') {
+    return 'Showing knockout warnings only';
+  }
+  if (tab === 'drift' && driftFocus === 'diluting') {
+    return 'Showing diluting sections only';
+  }
+  if (tab === 'recruiter' && recruiterFocus === 'misses') {
+    return 'Showing Boolean misses only';
+  }
+  return null;
+}

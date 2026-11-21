@@ -33,24 +33,24 @@ const CARDS = [
 
 export function EmptyState({ onLoadAndScrutinize, disabled }: EmptyStateProps) {
   return (
-    <div className="flex h-full flex-col items-center justify-center gap-8 p-6 text-center">
-      <div className="max-w-lg space-y-2">
-        <p className="font-display text-2xl font-semibold tracking-tight text-zinc-50">
+    <div className="@container flex h-full min-h-0 min-w-0 flex-col items-center justify-center gap-8 overflow-y-auto p-6 text-center">
+      <div className="w-full max-w-lg min-w-0 space-y-2">
+        <p className="font-display break-words text-2xl font-semibold tracking-tight text-zinc-50">
           Forensic ATS dashboard
         </p>
-        <p className="text-sm leading-relaxed text-zinc-400">
-          Load a sample trap resume or paste your own to reveal knockouts, drift,
-          and recruiter Boolean gaps.
+        <p className="break-words text-sm leading-relaxed text-zinc-400">
+          Load a sample trap resume or paste your own plain text to reveal
+          knockouts, drift, and recruiter Boolean gaps.
         </p>
       </div>
 
-      <div className="grid w-full max-w-3xl gap-3 sm:grid-cols-3">
+      <div className="grid w-full max-w-3xl min-w-0 gap-3 @md:grid-cols-3">
         {CARDS.map((card) => {
           const Icon = card.icon;
           return (
             <div
               key={card.step}
-              className="rounded-2xl border border-zinc-800 bg-zinc-900/60 p-4 text-left"
+              className="min-w-0 rounded-2xl border border-zinc-800 bg-zinc-900/60 p-4 text-left"
             >
               <div
                 className={`mb-3 inline-flex h-9 w-9 items-center justify-center rounded-lg ring-1 ${card.accent}`}
@@ -60,10 +60,10 @@ export function EmptyState({ onLoadAndScrutinize, disabled }: EmptyStateProps) {
               <p className="text-xs font-medium uppercase tracking-wider text-zinc-500">
                 Step {card.step}
               </p>
-              <h3 className="mt-1 text-sm font-semibold text-zinc-100">
+              <h3 className="mt-1 break-words text-sm font-semibold text-zinc-100">
                 {card.title}
               </h3>
-              <p className="mt-1.5 text-xs leading-relaxed text-zinc-400">
+              <p className="mt-1.5 break-words text-xs leading-relaxed text-zinc-400">
                 {card.body}
               </p>
             </div>
@@ -75,7 +75,7 @@ export function EmptyState({ onLoadAndScrutinize, disabled }: EmptyStateProps) {
         type="button"
         onClick={onLoadAndScrutinize}
         disabled={disabled}
-        className="rounded-xl bg-emerald-500 px-5 py-3 text-sm font-semibold text-zinc-950 transition hover:bg-emerald-400 disabled:cursor-not-allowed disabled:opacity-50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-300"
+        className="max-w-full shrink-0 rounded-xl bg-emerald-500 px-5 py-3 text-sm font-semibold text-zinc-950 transition hover:bg-emerald-400 disabled:cursor-not-allowed disabled:opacity-50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-300"
       >
         Load Sample & Scrutinize
       </button>

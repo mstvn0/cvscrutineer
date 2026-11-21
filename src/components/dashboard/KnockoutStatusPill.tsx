@@ -29,9 +29,9 @@ export function KnockoutStatusPill({
   const style = STYLES[status];
   return (
     <span
-      className={`inline-flex items-center rounded-full border px-3 py-1 text-xs font-semibold tracking-wide ring-1 ${style.className}`}
+      className={`inline-flex max-w-full items-center rounded-md border px-2 py-0.5 text-[10px] font-semibold tracking-wide ring-1 break-words ${style.className}`}
     >
-      Knockout: {style.label}
+      <span className="truncate">{style.label}</span>
     </span>
   );
 }

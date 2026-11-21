@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import {
+  activeFocusLabel,
   defaultDashboardTab,
   navigationFromGate,
   tabSeverity,
@@ -117,5 +118,45 @@ describe('tabSeverity', () => {
       analysis({ failedKnockoutCount: 2, warningKnockoutCount: 1 }),
     );
     expect(result).toEqual({ failed: 2, warning: 1, total: 1 });
+  });
+});
+
+describe('activeFocusLabel', () => {
+  it('returns null for unfiltered views', () => {
+    expect(
+      activeFocusLabel({
+        tab: 'knockouts',
+        knockoutFocus: 'all',
+        driftFocus: 'all',
+        recruiterFocus: 'all',
+      }),
+    ).toBeNull();
+  });
+
+  it('labels each narrowed gate filter', () => {
+    expect(
+      activeFocusLabel({
+        tab: 'knockouts',
+        knockoutFocus: 'failed',
+        driftFocus: 'all',
+        recruiterFocus: 'all',
+      }),
+    ).toMatch(/failed/i);
+    expect(
+      activeFocusLabel({
+        tab: 'drift',
+        knockoutFocus: 'all',
+        driftFocus: 'diluting',
+        recruiterFocus: 'all',
+      }),
+    ).toMatch(/diluting/i);
+    expect(
+      activeFocusLabel({
+        tab: 'recruiter',
+        knockoutFocus: 'all',
+        driftFocus: 'all',
+        recruiterFocus: 'misses',
+      }),
+    ).toMatch(/boolean/i);
   });
 });

@@ -1,5 +1,9 @@
 import { describe, expect, it } from 'vitest';
-import { AnalysisFindingsSchema, AnalysisSchema } from './analysis';
+import {
+  AnalysisFindingsSchema,
+  AnalysisSchema,
+  FixItSuggestionSchema,
+} from './analysis';
 
 const validFindings = {
   executiveSummary:
@@ -23,9 +27,14 @@ const validFindings = {
     {
       resumeSectionOrRole: 'Store Manager — Harbor & Pine Outfitters',
       driftDiagnosis: 'Diluting Vector' as const,
-      actionAdvice: 'Compress/Delete to a single line or remove entirely',
-      fixItSuggestion:
-        'Collapse the retail role to one line under Earlier Experience; keep only transferable ops verbs already on the resume.',
+      actionAdvice:
+        'Reword with JD/ATS terms already on the resume, else remove',
+      fixItSuggestion: {
+        advice:
+          'Collapse the Harbor & Pine role header + inventory bullet into one Earlier Experience line using only facts already listed.',
+        draftText:
+          'Earlier Experience: Store Manager — Harbor & Pine Outfitters — managed 22-person team; owned inventory forecasting and vendor coordination.',
+      },
     },
   ],
   recruiterSearchQueries: [
@@ -50,6 +59,38 @@ const validAnalysis = {
   },
 };
 
+describe('FixItSuggestionSchema', () => {
+  it('accepts advice with paste-ready draftText', () => {
+    const parsed = FixItSuggestionSchema.safeParse({
+      advice: 'Swap the Skills acronym for the exact JD term.',
+      draftText:
+        'TypeScript, React, Next.js, HTML/CSS, WordPress, WooCommerce, Shopify, retail operations, team leadership, merchandising, customer service, GraphQL, Jest',
+    });
+    expect(parsed.success).toBe(true);
+  });
+
+  it('accepts surgical keyword-swap draftText that keeps the rest of the line', () => {
+    const original =
+      'JS/TS, React, Next.js, HTML/CSS, WordPress, WooCommerce, Shopify, retail operations, team leadership, merchandising, customer service, GraphQL, Jest';
+    const swapped =
+      'TypeScript, React, Next.js, HTML/CSS, WordPress, WooCommerce, Shopify, retail operations, team leadership, merchandising, customer service, GraphQL, Jest';
+    const parsed = FixItSuggestionSchema.safeParse({
+      advice: 'On the Skills line, replace only "JS/TS" with "TypeScript".',
+      draftText: swapped,
+    });
+    expect(parsed.success).toBe(true);
+    expect(swapped.replace('TypeScript', 'JS/TS')).toBe(original);
+  });
+
+  it('allows null draftText for pure removal tips', () => {
+    const parsed = FixItSuggestionSchema.safeParse({
+      advice: 'Remove the WordPress brochure-site bullets; no JD overlap.',
+      draftText: null,
+    });
+    expect(parsed.success).toBe(true);
+  });
+});
+
 describe('AnalysisFindingsSchema', () => {
   it('parses findings without scores or rewrites', () => {
     expect(AnalysisFindingsSchema.safeParse(validFindings).success).toBe(true);
@@ -66,8 +107,12 @@ describe('AnalysisFindingsSchema', () => {
         {
           ...firstRule,
           status: 'failed',
-          fixItSuggestion:
-            'In Skills, replace "JS/TS" with the exact JD term "TypeScript" already implied by your stack.',
+          fixItSuggestion: {
+            advice:
+              'On the Skills line, replace only "JS/TS" with "TypeScript".',
+            draftText:
+              'TypeScript, React, Next.js, HTML/CSS, WordPress, WooCommerce, Shopify, retail operations, team leadership, merchandising, customer service, GraphQL, Jest',
+          },
         },
       ],
     });

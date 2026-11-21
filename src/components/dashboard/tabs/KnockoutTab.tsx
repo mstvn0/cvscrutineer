@@ -61,8 +61,8 @@ export function KnockoutTab({
   }
 
   return (
-    <div className="space-y-3">
-      <ul className="space-y-3">
+    <div className="min-w-0 space-y-3">
+      <ul className="min-w-0 space-y-3">
         {[...visibleFailed, ...visibleWarnings].map((rule, index) => (
           <KnockoutRow
             key={`${rule.rule}-${rule.status}-${index}`}
@@ -73,7 +73,7 @@ export function KnockoutTab({
       </ul>
       {showMet ? (
         <CollapsedNoiseSection label="Met knockouts" count={met.length}>
-          <ul className="space-y-3">
+          <ul className="min-w-0 space-y-3">
             {met.map((rule, index) => (
               <KnockoutRow
                 key={`${rule.rule}-met-${index}`}
@@ -91,33 +91,37 @@ export function KnockoutTab({
 function KnockoutRow({ rule, index }: { rule: Rule; index: number }) {
   const ui = STATUS_UI[rule.status];
   const Icon = ui.icon;
+  const tip = rule.fixItSuggestion;
   const showFixIt =
     rule.status === 'failed' &&
-    rule.fixItSuggestion !== null &&
-    rule.fixItSuggestion.trim().length > 0;
+    tip !== null &&
+    tip.advice.trim().length > 0;
 
   return (
-    <li className="rounded-xl border border-zinc-800 bg-zinc-900/50 p-4">
-      <div className="flex flex-wrap items-start justify-between gap-2">
+    <li className="min-w-0 overflow-hidden rounded-xl border border-zinc-800 bg-zinc-900/50 p-4">
+      <div className="flex min-w-0 flex-wrap items-start justify-between gap-2">
         <div className="min-w-0 flex-1">
-          <span className="inline-flex rounded-md border border-zinc-700 bg-zinc-950 px-2 py-0.5 text-[10px] font-medium uppercase tracking-wider text-zinc-400">
+          <span className="inline-flex max-w-full break-words rounded-md border border-zinc-700 bg-zinc-950 px-2 py-0.5 text-[10px] font-medium uppercase tracking-wider text-zinc-400">
             {rule.category}
           </span>
-          <p className="mt-2 text-sm font-semibold text-zinc-100">{rule.rule}</p>
+          <p className="mt-2 break-words text-sm font-semibold text-zinc-100">
+            {rule.rule}
+          </p>
         </div>
         <span
-          className={`inline-flex items-center gap-1.5 text-xs font-semibold ${ui.className}`}
+          className={`inline-flex shrink-0 items-center gap-1.5 text-xs font-semibold ${ui.className}`}
         >
           <Icon className="h-4 w-4" aria-hidden />
           {ui.label}
         </span>
       </div>
-      <p className="mt-2 text-sm leading-relaxed text-zinc-400">
+      <p className="mt-2 break-words text-sm leading-relaxed text-zinc-400">
         {rule.evidenceOrGap}
       </p>
-      {showFixIt && rule.fixItSuggestion ? (
+      {showFixIt && tip ? (
         <FixItTip
-          suggestion={rule.fixItSuggestion}
+          advice={tip.advice}
+          draftText={tip.draftText}
           copyKey={`knockout-${index}`}
         />
       ) : null}

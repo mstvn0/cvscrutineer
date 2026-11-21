@@ -27,7 +27,7 @@ const DIAGNOSIS_STYLES: Record<
     fill: 'bg-rose-500',
     badge: 'border-rose-500/30 bg-rose-500/10 text-rose-300',
     width: 'w-1/6',
-    label: 'Compress / delete',
+    label: 'Reword / remove',
   },
 };
 
@@ -60,8 +60,8 @@ export function DriftTab({
   }
 
   return (
-    <div className="space-y-3">
-      <ul className="space-y-3">
+    <div className="min-w-0 space-y-3">
+      <ul className="min-w-0 space-y-3">
         {priority.map((row, index) => (
           <DriftRow
             key={`${row.resumeSectionOrRole}-${index}`}
@@ -75,7 +75,7 @@ export function DriftTab({
           label="High Signal sections"
           count={highSignal.length}
         >
-          <ul className="space-y-3">
+          <ul className="min-w-0 space-y-3">
             {highSignal.map((row, index) => (
               <DriftRow
                 key={`${row.resumeSectionOrRole}-hs-${index}`}
@@ -92,27 +92,28 @@ export function DriftTab({
 
 function DriftRow({ row, index }: { row: Row; index: number }) {
   const styles = DIAGNOSIS_STYLES[row.driftDiagnosis];
+  const tip = row.fixItSuggestion;
   const showFixIt =
     row.driftDiagnosis === 'Diluting Vector' &&
-    row.fixItSuggestion !== null &&
-    row.fixItSuggestion.trim().length > 0;
+    tip !== null &&
+    tip.advice.trim().length > 0;
 
   return (
-    <li className="rounded-xl border border-zinc-800 bg-zinc-900/50 p-4">
-      <div className="flex flex-wrap items-center justify-between gap-2">
-        <p className="text-sm font-semibold text-zinc-100">
+    <li className="min-w-0 overflow-hidden rounded-xl border border-zinc-800 bg-zinc-900/50 p-4">
+      <div className="flex min-w-0 flex-wrap items-center justify-between gap-2">
+        <p className="min-w-0 flex-1 break-words text-sm font-semibold text-zinc-100">
           {row.resumeSectionOrRole}
         </p>
         <span
-          className={`rounded-full border px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide ${styles.badge}`}
+          className={`shrink-0 rounded-full border px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide ${styles.badge}`}
         >
           {row.driftDiagnosis}
         </span>
       </div>
-      <div className="mt-3">
-        <div className="mb-1 flex justify-between text-[11px] text-zinc-500">
-          <span>Signal band</span>
-          <span>{styles.label}</span>
+      <div className="mt-3 min-w-0">
+        <div className="mb-1 flex justify-between gap-2 text-[11px] text-zinc-500">
+          <span className="shrink-0">Signal band</span>
+          <span className="min-w-0 truncate text-right">{styles.label}</span>
         </div>
         <div className="h-2 overflow-hidden rounded-full bg-zinc-800">
           <div
@@ -120,12 +121,13 @@ function DriftRow({ row, index }: { row: Row; index: number }) {
           />
         </div>
       </div>
-      <p className="mt-3 text-sm leading-relaxed text-zinc-400">
+      <p className="mt-3 break-words text-sm leading-relaxed text-zinc-400">
         {row.actionAdvice}
       </p>
-      {showFixIt && row.fixItSuggestion ? (
+      {showFixIt && tip ? (
         <FixItTip
-          suggestion={row.fixItSuggestion}
+          advice={tip.advice}
+          draftText={tip.draftText}
           copyKey={`drift-${index}`}
         />
       ) : null}

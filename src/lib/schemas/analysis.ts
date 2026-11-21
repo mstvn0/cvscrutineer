@@ -1,6 +1,24 @@
 import { z } from 'zod';
 
 /**
+ * Fix-it: short advice plus optional paste-ready draft.
+ * Copy uses draftText only — never the advice blurb.
+ */
+export const FixItSuggestionSchema = z.object({
+  advice: z
+    .string()
+    .describe(
+      'One short sentence explaining what to change and why (guidance only; not what Copy pastes).',
+    ),
+  draftText: z
+    .string()
+    .nullable()
+    .describe(
+      'Paste-ready text from one concrete resume entry (bullet, skills line, summary sentence, or role header). For keyword/acronym swaps (e.g. JS/TS → TypeScript), return that exact line with ONLY the target token replaced—do not rephrase, reorder, drop, or add other words. Broader rewrites may adjust wording but must keep the same employers/facts. Null only for pure removal. Never invent metrics, tools, employers, or outcomes.',
+    ),
+});
+
+/**
  * Shared LLM findings schema for CVScrutineer analysis.
  * Probabilities are intentionally omitted — verdict is derived deterministically.
  */
@@ -43,12 +61,9 @@ export const AnalysisFindingsSchema = z.object({
         .describe(
           'Exact quote or reason why the resume passes or triggers auto-rejection',
         ),
-      fixItSuggestion: z
-        .string()
-        .nullable()
-        .describe(
-          'When status is failed: one short grounded tip (phrase swap or where to add the missing keyword) using only resume/JD text. Null for met/warning. Never invent skills, employers, or metrics.',
-        ),
+      fixItSuggestion: FixItSuggestionSchema.nullable().describe(
+        'When status is failed: advice plus draftText from one real resume entry. Keyword gaps: swap only the missing/near-miss token on that line (e.g. JS/TS → TypeScript) and leave every other word unchanged. Null for met/warning. Never invent skills, employers, or metrics.',
+      ),
     }),
   ),
   semanticDriftAudit: z.array(
@@ -60,14 +75,11 @@ export const AnalysisFindingsSchema = z.object({
       actionAdvice: z
         .string()
         .describe(
-          'Concrete instruction: Expand metrics, Keep concise, or Compress/Delete to stop dragging down semantic relevance',
+          'Concrete instruction: Expand metrics, Keep concise, or Reword with JD/ATS terms already on the resume (else remove) to stop dragging down semantic relevance',
         ),
-      fixItSuggestion: z
-        .string()
-        .nullable()
-        .describe(
-          'When Diluting Vector: one short grounded tip to compress, reframe, or relocate existing resume text only. Null for High Signal/Neutral. Never invent new experience.',
-        ),
+      fixItSuggestion: FixItSuggestionSchema.nullable().describe(
+        'When Diluting Vector: advice plus draftText that rewrites that section’s own resume wording with JD/ATS terms already elsewhere on the resume. draftText null only for pure removal. Null object for High Signal/Neutral. Never invent new experience.',
+      ),
     }),
   ),
   recruiterSearchQueries: z.array(
@@ -107,6 +119,7 @@ export const AnalysisSchema = AnalysisFindingsSchema.extend({
   verdictBreakdown: VerdictBreakdownSchema,
 });
 
+export type FixItSuggestion = z.infer<typeof FixItSuggestionSchema>;
 export type AnalysisFindings = z.infer<typeof AnalysisFindingsSchema>;
 export type AnalysisResult = z.infer<typeof AnalysisSchema>;
 export type KnockoutStatus = z.infer<typeof KnockoutStatusSchema>;

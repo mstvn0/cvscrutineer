@@ -1,8 +1,8 @@
 'use client';
 
-import { AlertTriangle } from 'lucide-react';
 import type { GateMetricKey } from '@/lib/dashboardNavigation';
 import type { AnalysisResult } from '@/lib/schemas/analysis';
+import { AtsParsedPanel } from './AtsParsedPanel';
 import { VerdictPanel } from './VerdictPanel';
 
 type ScoreboardProps = {
@@ -11,70 +11,26 @@ type ScoreboardProps = {
 };
 
 export function Scoreboard({ analysis, onGateNavigate }: ScoreboardProps) {
-  const { atsParsedProfile, executiveSummary } = analysis;
+  const { executiveSummary } = analysis;
 
   return (
-    <div className="space-y-4">
-      <div className="grid gap-4 lg:grid-cols-[minmax(0,1.1fr)_minmax(0,1fr)]">
-        <VerdictPanel analysis={analysis} onGateNavigate={onGateNavigate} />
-        <div className="rounded-xl border border-zinc-800 bg-zinc-900/60 p-4">
-          <p className="text-xs font-medium uppercase tracking-wider text-zinc-500">
+    <div className="@container min-w-0 space-y-2">
+      <div className="grid min-w-0 gap-2 @2xl:grid-cols-2 @2xl:items-stretch">
+        <div className="min-w-0">
+          <VerdictPanel analysis={analysis} onGateNavigate={onGateNavigate} />
+        </div>
+
+        <section className="flex min-w-0 flex-col rounded-xl border border-zinc-800 bg-zinc-900/70 p-3">
+          <p className="text-[11px] font-medium uppercase tracking-wider text-zinc-500">
             Executive diagnosis
           </p>
-          <p className="mt-2 text-sm leading-relaxed text-zinc-200">
+          <p className="mt-2 line-clamp-6 break-words text-sm leading-snug text-zinc-200 @2xl:line-clamp-none @2xl:flex-1">
             {executiveSummary}
           </p>
-        </div>
+        </section>
       </div>
 
-      <div className="rounded-xl border border-zinc-800 bg-zinc-900/40 p-3">
-        <p className="mb-2 text-xs font-medium uppercase tracking-wider text-zinc-500">
-          What the ATS Bot Parsed
-        </p>
-        <div className="grid gap-2 sm:grid-cols-3">
-          <ParsedCell
-            label="Detected Title"
-            value={atsParsedProfile.detectedPrimaryTitle}
-          />
-          <ParsedCell
-            label="Relevant Years"
-            value={String(atsParsedProfile.calculatedRelevantYears)}
-          />
-          <ParsedCell
-            label="Seniority Tier"
-            value={atsParsedProfile.seniorityClassification}
-          />
-        </div>
-        {atsParsedProfile.parserWarnings.length > 0 ? (
-          <ul className="mt-3 space-y-1.5">
-            {atsParsedProfile.parserWarnings.map((warning) => (
-              <li
-                key={warning}
-                className="flex items-start gap-2 text-xs text-amber-200/90"
-              >
-                <AlertTriangle
-                  className="mt-0.5 h-3.5 w-3.5 shrink-0 text-amber-400"
-                  aria-hidden
-                />
-                <span>{warning}</span>
-              </li>
-            ))}
-          </ul>
-        ) : null}
-      </div>
-    </div>
-  );
-}
-
-function ParsedCell({ label, value }: { label: string; value: string }) {
-  return (
-    <div className="rounded-lg bg-zinc-950/60 px-3 py-2">
-      <p className="text-[10px] uppercase tracking-wider text-zinc-500">
-        {label}
-      </p>
-      <p className="mt-0.5 truncate text-sm font-medium text-zinc-100">
-        {value}
-      </p>
+      <AtsParsedPanel profile={analysis.atsParsedProfile} />
     </div>
   );
 }

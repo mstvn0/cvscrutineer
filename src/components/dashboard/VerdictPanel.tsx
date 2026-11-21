@@ -12,17 +12,17 @@ type VerdictPanelProps = {
 const CRITERIA = [
   {
     key: 'failedKnockoutCount' as const,
-    label: 'Hard knockouts failed',
+    label: 'Hard fails',
     failTone: true,
   },
   {
     key: 'warningKnockoutCount' as const,
-    label: 'Knockout warnings',
+    label: 'Warnings',
     failTone: false,
   },
   {
     key: 'dilutingSectionCount' as const,
-    label: 'Diluting sections',
+    label: 'Diluting',
     failTone: false,
   },
   {
@@ -32,24 +32,45 @@ const CRITERIA = [
   },
 ] as const;
 
+/** One-line blurbs — same height per entry; truncate if the pane is narrow. */
+const GATE_LEGEND = [
+  {
+    status: 'LIKELY_REJECTED',
+    tone: 'text-rose-300',
+    body: 'Hard knockout failed — auto-reject before review',
+  },
+  {
+    status: 'AT_RISK',
+    tone: 'text-amber-300',
+    body: 'Warnings, diluting sections, or Boolean misses',
+  },
+  {
+    status: 'PASS',
+    tone: 'text-emerald-300',
+    body: 'All knockouts met; no diluting; Booleans on page 1',
+  },
+] as const;
+
 export function VerdictPanel({ analysis, onGateNavigate }: VerdictPanelProps) {
   const { knockoutStatus, verdictBreakdown } = analysis;
 
   return (
-    <div className="rounded-2xl border border-zinc-800 bg-zinc-900/70 p-4">
-      <div className="flex flex-wrap items-center justify-between gap-2">
-        <p className="text-xs font-medium uppercase tracking-wider text-zinc-500">
+    <div className="@container flex h-full min-w-0 flex-col rounded-xl border border-zinc-800 bg-zinc-900/70 p-3">
+      <div className="flex min-w-0 flex-wrap items-center justify-between gap-2">
+        <p className="min-w-0 text-[11px] font-medium uppercase tracking-wider text-zinc-500">
           Gate classification
         </p>
-        <KnockoutStatusPill status={knockoutStatus} />
+        <div className="max-w-full min-w-0">
+          <KnockoutStatusPill status={knockoutStatus} />
+        </div>
       </div>
 
-      <p className="mt-3 text-sm leading-relaxed text-zinc-200">
+      <p className="mt-2 line-clamp-3 break-words text-sm leading-snug text-zinc-200">
         {verdictBreakdown.classificationRule}
       </p>
 
       <div
-        className="mt-4 grid grid-cols-2 gap-2 sm:grid-cols-4 sm:items-stretch"
+        className="mt-2.5 grid grid-cols-2 gap-1.5 @min-[22rem]:grid-cols-4"
         role="list"
         aria-label="Gate metric counts"
       >
@@ -61,13 +82,13 @@ export function VerdictPanel({ analysis, onGateNavigate }: VerdictPanelProps) {
             : item.failTone
               ? 'border-rose-500/30 bg-rose-500/10 text-rose-200'
               : 'border-amber-500/30 bg-amber-500/10 text-amber-200';
-          const className = `flex h-full min-h-[4.75rem] w-full flex-col rounded-xl border px-3 py-2.5 text-left ${tone}`;
+          const className = `flex min-w-0 flex-col rounded-lg border px-2 py-1.5 text-left ${tone}`;
           const body = (
             <>
-              <span className="font-mono text-2xl font-semibold leading-none tracking-tight tabular-nums">
+              <span className="font-mono text-lg font-semibold leading-none tracking-tight tabular-nums">
                 {value.toLocaleString()}
               </span>
-              <span className="mt-2 min-h-[2.25rem] text-[10px] font-medium uppercase leading-snug tracking-wider opacity-80">
+              <span className="mt-1 break-words text-[9px] font-medium uppercase leading-snug tracking-wider opacity-80">
                 {item.label}
               </span>
             </>
@@ -79,7 +100,8 @@ export function VerdictPanel({ analysis, onGateNavigate }: VerdictPanelProps) {
               type="button"
               role="listitem"
               onClick={() => onGateNavigate(item.key)}
-              className={`${className} cursor-pointer transition hover:brightness-110 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-400`}
+              title={`Jump to ${item.label.toLowerCase()} in results`}
+              className={`${className} cursor-pointer ring-inset transition hover:brightness-110 hover:ring-1 hover:ring-current/30 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-400`}
               aria-label={`Show ${item.label.toLowerCase()} in results`}
             >
               {body}
@@ -92,20 +114,29 @@ export function VerdictPanel({ analysis, onGateNavigate }: VerdictPanelProps) {
         })}
       </div>
 
-      <ol className="mt-4 space-y-1.5 text-[11px] leading-relaxed text-zinc-500">
-        <li>
-          <span className="font-medium text-rose-300">LIKELY_REJECTED</span> —
-          any hard knockout failed
-        </li>
-        <li>
-          <span className="font-medium text-amber-300">AT_RISK</span> — no hard
-          fails, but warnings, diluting sections, or Boolean misses
-        </li>
-        <li>
-          <span className="font-medium text-emerald-300">PASS</span> — all
-          knockouts met, no diluting sections, all Boolean queries on page 1
-        </li>
-      </ol>
+      <ul
+        className="mt-2.5 min-w-0 space-y-1.5"
+        aria-label="How gate status is decided"
+      >
+        {GATE_LEGEND.map((item) => (
+          <li
+            key={item.status}
+            className="flex min-w-0 items-center gap-2 text-[10px] leading-none"
+          >
+            <span
+              className={`w-[8.25rem] shrink-0 font-medium tracking-wide ${item.tone}`}
+            >
+              {item.status}
+            </span>
+            <span
+              className="min-w-0 flex-1 truncate text-zinc-500"
+              title={item.body}
+            >
+              {item.body}
+            </span>
+          </li>
+        ))}
+      </ul>
     </div>
   );
 }
