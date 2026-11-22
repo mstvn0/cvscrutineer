@@ -42,8 +42,8 @@ It is **designed not** to invent fake skills, fake metrics, or a made-up “matc
 The product has three layers:
 
 1. **Browser (UI)** — paste inputs, show loading, show the forensics dashboard  
-2. **App server (analysis API)** — checks input, calls the AI, applies the final grade  
-3. **AI provider (xAI)** — reads resume + JD and returns structured findings  
+2. **App server (analysis API)** — validates input, calls the model, reconciles Boolean exact terms, applies the final grade  
+3. **AI provider (xAI)** — reads resume + JD and returns structured findings without the final gate  
 
 ```mermaid
 graph TB
@@ -53,35 +53,36 @@ graph TB
   end
   subgraph Server
     API[Analyze API]
-    Check[Input checks]
-    Grade[Fixed grading rules]
+    Check[Validate resume and JD length]
+    Grade[Reconcile Boolean then grade]
   end
   subgraph Provider
     Model[Language model]
   end
-  Input -->|Scrutinize| API
+  Input -->|POST scrutinize request| API
   API --> Check
-  Check -->|OK| Model
-  Model -->|Findings| Grade
-  Grade -->|Merged response| API
-  API -->|Full result via client| Dash
-  API -->|Error via client| Input
+  Check -->|Valid| Model
+  Model -->|Structured findings| Grade
+  Grade -->|Merged analysis result| API
+  API -->|Success payload| Dash
+  API -->|Error payload| Input
 ```
+
 ### Trust boundary (simple)
 
 ```mermaid
 graph LR
-  U[User text] --> B[Browser]
-  B -->|JSON request| S[Our server]
-  S -->|API key stays here| AI[AI provider]
-  AI -->|Structured findings| S
+  U[Pasted resume and JD] --> B[Browser]
+  B -->|JSON to /api/analyze| S[App server]
+  S -->|API key stays on server| AI[xAI model]
+  AI -->|Findings without final gate| S
   S -->|Graded result or error| B
 ```
 
 - The AI API key never goes to the browser.
-- The Scrutinize button stays disabled until each field has at least **50** characters. Textareas also cap paste length at **9,500** characters in the UI.
-- The server re-validates both fields at **50–10,000** characters before calling the AI.
-- The final Pass / At Risk / Rejected label is calculated **on our server**, not by the model.
+- **Scrutinize** stays disabled until **each entry field** (resume and job description) has at least **50** trimmed characters. The UI also caps each field at **9,500** characters.
+- The server re-validates both strings at **50–10,000** characters (after trim) before calling the model.
+- Boolean Would Match / Filtered Out is re-checked on the server with **exact** resume terms; the final gate label is also calculated **on our server**, not by the model.
 
 ---
 
@@ -100,21 +101,23 @@ graph TB
     CL[Analyze client]
     AP[Analyze API]
     VL[Request validator]
-    PR[AI instructions]
-    SC[Findings contract]
+    PR[System prompt]
+    SC[Findings Zod schema]
+    BM[Boolean exact-term reconcile]
     VD[Verdict grading engine]
   end
   IW --> HS
   HS --> CL
-  CL -->|POST| AP
+  CL -->|POST /api/analyze| AP
   AP --> VL
-  VL -->|OK| AP
-  AP --> ModelCall[AI call]
+  VL -->|Valid body| AP
+  AP --> ModelCall[Model generateObject]
   PR --> ModelCall
   SC --> ModelCall
-  ModelCall --> VD
-  VD -->|Merge into response| AP
-  AP -->|HTTP response| CL
+  ModelCall --> BM
+  BM --> VD
+  VD -->|Merge into HTTP response| AP
+  AP --> CL
   CL --> HS
   HS --> RD
 ```
@@ -125,10 +128,11 @@ graph TB
 | **Scrutinize controller** | Starts analysis, rotates loading messages, tracks success/error; aborts an in-flight request if a new run starts or results are cleared | Owns the “run analysis” experience |
 | **Analyze client** | Sends the request to the server and checks the reply looks valid | Protects the UI from broken payloads |
 | **Analyze API** | Server entry point for one analysis run | Single place for secrets and AI calls |
-| **Request validator** | Confirms both texts exist and are within size limits | Avoids wasted AI calls and bad input |
+| **Request validator** | Confirms both entry fields are strings within 50–10,000 trimmed characters | Avoids wasted model calls and bad input |
 | **AI instructions** | Rules the model must follow (grounding, Fix-it format, no fake scores) | Keeps AI behavior consistent |
 | **Findings contract** | Defines the exact fields the AI must return | Makes results predictable for the UI |
-| **Verdict / grading engine** | Reconciles Boolean exact-term hits against the resume, then turns findings into PASS / AT_RISK / LIKELY_REJECTED plus counts | Repeatable, explainable final status (Boolean flags are not trusted from the model alone) |
+| **Boolean exact-term reconcile** | Re-evaluates each recruiter Boolean query against the resume with exact string matching | Stops false Would Match when only near-miss acronyms exist (TypeScript vs TS) |
+| **Verdict / grading engine** | Turns reconciled findings into PASS / AT_RISK / LIKELY_REJECTED plus counts | Repeatable, explainable final gate status |
 | **Results dashboard** | Shows scoreboard + knockout / drift / recruiter tabs | Turns findings into something humans can use |
 
 **Note:** Loading stage messages (knockouts → drift → Boolean) are **cosmetic progress text**. They rotate while waiting; they are not separate AI steps.
@@ -157,55 +161,55 @@ sequenceDiagram
   participant AI
   participant Grade
 
-  User->>UI: Paste resume and JD, click Scrutinize
-  Note over UI: Button needs 50 chars per field
-  UI->>UI: Show loading skeleton
-  UI->>API: Send both texts
-  API->>API: Validate again
-  API->>AI: Ask for structured findings
-  AI-->>API: Findings without final grade
-  API->>Grade: Reconcile Boolean exact terms vs resume
-  Grade->>Grade: Apply fixed status rules
-  Grade-->>API: PASS, AT_RISK, or LIKELY_REJECTED
-  API-->>UI: Full result
-  UI->>User: Show dashboard
+  User->>UI: Paste resume and JD, then click Scrutinize
+  Note over UI: Scrutinize enables only when each entry field has 50+ trimmed characters
+  UI->>UI: Show loading skeleton and rotate stage labels
+  UI->>API: POST resume and job description
+  API->>API: Re-validate length 50 to 10000 after trim
+  API->>AI: Request structured findings
+  AI-->>API: Findings without final gate status
+  API->>Grade: Reconcile Boolean exact terms against resume
+  Grade->>Grade: Apply fixed PASS / AT_RISK / LIKELY_REJECTED rules
+  Grade-->>API: Merged analysis result
+  API-->>UI: Full result payload
+  UI->>User: Show forensics dashboard
 ```
 
 ### 5.2 Error path (as implemented)
 
 ```mermaid
 graph TD
-  A[User tries to Scrutinize] --> B{Each field has 50+ chars?}
-  B -->|No| C[Button stays disabled]
-  B -->|Yes| D[Call Analyze API]
-  D --> E{Server validation OK?}
-  E -->|No| F[Show error under inputs]
-  E -->|Yes| G[Call AI]
-  G --> H{AI or network OK?}
-  H -->|429| I[Error message: rate limited]
-  H -->|No valid object| J[Error message: shorten or clarify]
-  H -->|Other 400 or 500| K[Error message from API]
-  H -->|OK| L[Grade and show dashboard]
+  A[User clicks Scrutinize] --> B{Each entry field has 50+ trimmed chars?}
+  B -->|No| C[Scrutinize stays disabled]
+  B -->|Yes| D[POST /api/analyze]
+  D --> E{Server length and type checks pass?}
+  E -->|No| F[Show error under input workspace]
+  E -->|Yes| G[Call language model]
+  G --> H{Model and network succeed?}
+  H -->|Rate limited 429| I[Show rate-limit error]
+  H -->|Invalid model object| J[Ask user to shorten or clarify inputs]
+  H -->|Other 400 or 500| K[Show API error message]
+  H -->|OK| L[Reconcile Boolean, grade, show dashboard]
   I --> F
   J --> F
   K --> F
 ```
 
-On error, the results pane shows the empty-state CTA again; the error string from the API (or a client fallback) appears under the input fields. There is no separate Cancel control during loading.
+On error, the results pane returns to the empty-state CTA; the error string from the API (or a client fallback) appears under the input fields. There is no separate Cancel control during loading; starting a new run or clearing aborts an in-flight request.
 
-### 5.3 Two-step design (AI finds → app grades)
+### 5.3 AI finds → app reconciles Boolean → app grades
 
 ```mermaid
 graph TD
-  IN[Resume and job description] --> AI[AI extracts findings]
-  AI --> Bool[App reconciles Boolean exact terms]
-  Bool --> Grade[App grading engine]
+  IN[Resume and job description] --> AI[Model extracts structured findings]
+  AI --> Bool[Server reconciles Boolean exact terms]
+  Bool --> Grade[Server grading engine]
   Grade --> C{Any hard knockout failed?}
   C -->|Yes| R[LIKELY_REJECTED]
-  C -->|No| D{Warnings, diluting, or Boolean misses?}
+  C -->|No| D{Any warning, diluting section, or Boolean miss?}
   D -->|Yes| A[AT_RISK]
   D -->|No| P[PASS]
-  R --> UI[Dashboard]
+  R --> UI[Results dashboard]
   A --> UI
   P --> UI
 ```
@@ -216,7 +220,7 @@ Boolean reconcile and the decision diamonds above are **server rules**, not choi
 | --- | --- |
 | **LIKELY_REJECTED** | At least one hard “must-have” failed |
 | **AT_RISK** | No hard fails, but warnings, diluting sections, and/or Boolean misses |
-| **PASS** | No hard fails, no warnings, no diluting sections, and every Boolean query would match |
+| **PASS** | No hard fails, **no warnings**, no diluting sections, and every Boolean query would match (exact terms) |
 
 **Why separate AI and grading?**
 
@@ -263,14 +267,14 @@ Each Fix-it has two parts in the data model:
 
 ```mermaid
 graph TD
-  Note[Prompt instructions only - not app code paths]
-  Note --> F[Failed/warning knockout or Diluting Vector]
+  Note[Prompt rules only - not separate app branches]
+  Note --> F[Failed knockout, warning near-miss, or Diluting Vector]
   F --> T{What kind of fix?}
-  T -->|Keyword gap| K[Swap only that token; coach-style what/where/why]
-  T -->|Warning near-miss| N[Invite exact JD term if uploader decides it fits]
-  T -->|Needs reword, placement clear| W[Rewrite or add bullet under that title]
-  T -->|Needs reword, placement unclear| U[Fix-it still; user chooses which experience]
-  T -->|Nothing salvageable| R[Advice only, draftText null]
+  T -->|Keyword or acronym gap| K[Change only that token with coach-style advice]
+  T -->|Warning near-miss framing| N[Invite exact JD term if uploader decides it fits]
+  T -->|Reword with clear role| W[Rewrite or add bullet under that title]
+  T -->|Reword with unclear placement| U[Still suggest a rewrite; uploader picks the experience]
+  T -->|Nothing salvageable| R[Advice only; draftText is null]
 ```
 
 These branches describe **how the model is instructed to write Fix-its**, not separate code paths in the app.
@@ -304,26 +308,29 @@ After a successful run, layout is:
 
 ```mermaid
 graph TB
-  subgraph TopRow
-    G[Gate classification]
+  subgraph Scoreboard
+    G[Gate classification and legend]
     E[Executive diagnosis]
   end
   A[What the ATS Bot Parsed]
   subgraph Results
-    TBAR[Tab bar]
-    LIST[Scrollable results]
+    TBAR[Tab bar with severity badges]
+    BANNER[Optional focus filter banner]
+    LIST[Scrollable tab results]
   end
-  TopRow --> A
+  Scoreboard --> A
   A --> Results
   G --- E
-  TBAR --> LIST
+  TBAR --> BANNER
+  BANNER --> LIST
 ```
 
 Also implemented:
 
-- Non-zero gate metric tiles jump to the matching tab with a filter banner (Clear resets the filter).
+- Non-zero gate metric tiles jump to the matching tab and open a filter banner (**Clear** resets the filter).
 - **Met knockouts** and **High Signal sections** stay collapsed by default.
-- When the results list overflows, a “Scroll for more” cue can appear.
+- When the results list overflows, a **Scroll for more** cue can appear.
+- On narrow viewports, results sit above the input workspace; on wide layouts they sit side by side.
 
 ---
 

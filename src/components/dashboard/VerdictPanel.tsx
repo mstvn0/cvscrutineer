@@ -47,7 +47,7 @@ const GATE_LEGEND = [
   {
     status: 'PASS',
     tone: 'text-emerald-300',
-    body: 'All knockouts met; no diluting; Boolean queries matched',
+    body: 'All knockouts met (no warnings); no diluting; Boolean queries matched',
   },
 ] as const;
 

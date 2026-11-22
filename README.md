@@ -25,7 +25,7 @@ Classification is deterministic on the server (see the one-line Gate legend in t
 | --- | --- |
 | **LIKELY_REJECTED** | Hard knockout failed — auto-reject before review |
 | **AT_RISK** | Warnings, diluting sections, or Boolean misses |
-| **PASS** | All knockouts met; no diluting; Boolean queries matched |
+| **PASS** | All knockouts met (no warnings); no diluting; Boolean queries matched |
 
 No invented percentage scores.
 
@@ -33,7 +33,7 @@ No invented percentage scores.
 
 1. Open the [live demo](https://cvscrutineer.vercel.app/) or run the app locally (see Local Setup).
 2. Paste **plain text** for your resume and the target job description (file upload is not supported—copy from your editor or PDF and paste). Each field is capped at about **9,500 characters** in the UI. Or use **Sample: Senior Frontend Dev** / **Sample: Product Manager** above the inputs.
-3. Click **Scrutinize Resume** (or **Load Sample & Scrutinize** on the empty dashboard) and wait while knockout rules, vector drift, and recruiter Boolean checks run.
+3. Click **Scrutinize Resume** (or **Load Sample & Scrutinize** on the empty dashboard) and wait for one analysis run (findings from the model, then server-side Boolean exact-term checks and grading).
 4. Read **Gate classification** + the status legend, the **executive diagnosis**, and **What the ATS Bot Parsed**.
 5. Click a non-zero gate count (e.g. hard fails) to jump to the filtered results tab; use **Clear** on the filter banner to show the full tab again.
 6. Review **Fix-it** under failed/warning knockouts and Diluting Vector rows: read the advice, then **Copy** from the **Suggestions** box only when the rewrite is truthful for you.
@@ -53,6 +53,8 @@ No invented percentage scores.
 ## Local Setup
 
 ### 1. Install dependencies
+
+Requires **Node.js 22+**.
 
 ```bash
 npm install

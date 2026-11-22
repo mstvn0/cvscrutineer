@@ -15,7 +15,7 @@ export type VerdictResult = {
  *
  * LIKELY_REJECTED — any hard knockout failed (auto-reject before human review)
  * AT_RISK — no hard fails, but warnings, diluting sections, or Boolean misses
- * PASS — all knockouts met, no diluting vectors, all Boolean queries would match
+ * PASS — no failed/warning knockouts, no diluting vectors, all Boolean queries would match
  */
 export function deriveVerdict(findings: AnalysisFindings): VerdictResult {
   const failedKnockoutCount = findings.knockoutRules.filter(
@@ -86,7 +86,7 @@ export function deriveVerdict(findings: AnalysisFindings): VerdictResult {
       dilutingSectionCount: 0,
       missedBooleanCount: 0,
       classificationRule:
-        'All knockout rules met, no diluting sections, and every recruiter Boolean query would match.',
+        'All knockout rules met with no warnings, no diluting sections, and every recruiter Boolean query would match.',
     },
   };
 }
