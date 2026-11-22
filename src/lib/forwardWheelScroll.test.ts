@@ -1,103 +1,138 @@
-/** @vitest-environment jsdom */
-import { afterEach, describe, expect, it, vi } from 'vitest';
+/**
+ * Minimal DOM stubs — avoids jsdom/undici, which crash on Node 20
+ * (createZstdDecompress is undefined).
+ */
+import { afterEach, beforeAll, describe, expect, it, vi } from 'vitest';
 import {
   attachForwardWheel,
   forwardWheelToAncestor,
   isVerticallyScrollable,
 } from './forwardWheelScroll';
 
-function mockScrollable(
+type Style = { overflowY: string };
+
+class TestHTMLElement {
+  parentElement: TestHTMLElement | null = null;
+  scrollTop = 0;
+  scrollHeight = 0;
+  clientHeight = 0;
+  #listeners = new Map<string, Set<(event: TestWheelEvent) => void>>();
+
+  appendChild(child: TestHTMLElement): TestHTMLElement {
+    child.parentElement = this;
+    return child;
+  }
+
+  addEventListener(
+    type: string,
+    listener: (event: TestWheelEvent) => void,
+  ): void {
+    const set = this.#listeners.get(type) ?? new Set();
+    set.add(listener);
+    this.#listeners.set(type, set);
+  }
+
+  removeEventListener(
+    type: string,
+    listener: (event: TestWheelEvent) => void,
+  ): void {
+    this.#listeners.get(type)?.delete(listener);
+  }
+
+  dispatchEvent(event: TestWheelEvent): boolean {
+    const listeners = this.#listeners.get(event.type);
+    if (!listeners) return true;
+    for (const listener of listeners) {
+      listener.call(this, event);
+    }
+    return true;
+  }
+}
+
+type TestWheelEvent = {
+  type: string;
+  deltaY: number;
+  ctrlKey: boolean;
+  preventDefault: () => void;
+  composedPath: () => TestHTMLElement[];
+};
+
+const styleByElement = new WeakMap<object, Style>();
+
+function el(
   overflowY: string,
   scrollHeight: number,
   clientHeight: number,
-): HTMLElement {
-  const el = document.createElement('div');
-  Object.defineProperty(el, 'scrollHeight', { value: scrollHeight });
-  Object.defineProperty(el, 'clientHeight', { value: clientHeight });
-  vi.spyOn(window, 'getComputedStyle').mockReturnValue({
-    overflowY,
-  } as CSSStyleDeclaration);
-  return el;
+): TestHTMLElement {
+  const node = new TestHTMLElement();
+  node.scrollHeight = scrollHeight;
+  node.clientHeight = clientHeight;
+  styleByElement.set(node, { overflowY });
+  return node;
 }
 
-describe('isVerticallyScrollable', () => {
-  afterEach(() => {
-    vi.restoreAllMocks();
-  });
+function asHtml(node: TestHTMLElement): HTMLElement {
+  return node as unknown as HTMLElement;
+}
 
+beforeAll(() => {
+  vi.stubGlobal('HTMLElement', TestHTMLElement);
+  vi.stubGlobal('getComputedStyle', (node: object) => {
+    return styleByElement.get(node) ?? { overflowY: 'visible' };
+  });
+});
+
+afterEach(() => {
+  vi.clearAllMocks();
+});
+
+describe('isVerticallyScrollable', () => {
   it('is true for overflow auto with extra scroll height', () => {
-    const el = mockScrollable('auto', 200, 100);
-    expect(isVerticallyScrollable(el)).toBe(true);
+    expect(isVerticallyScrollable(asHtml(el('auto', 200, 100)))).toBe(true);
   });
 
   it('is false when overflow is visible', () => {
-    const el = mockScrollable('visible', 200, 100);
-    expect(isVerticallyScrollable(el)).toBe(false);
+    expect(isVerticallyScrollable(asHtml(el('visible', 200, 100)))).toBe(
+      false,
+    );
   });
 
   it('is false when content fits', () => {
-    const el = mockScrollable('auto', 100, 100);
-    expect(isVerticallyScrollable(el)).toBe(false);
+    expect(isVerticallyScrollable(asHtml(el('auto', 100, 100)))).toBe(false);
   });
 });
 
 describe('forwardWheelToAncestor', () => {
-  afterEach(() => {
-    vi.restoreAllMocks();
-  });
-
   it('scrolls the nearest scrollable ancestor', () => {
-    const parent = document.createElement('div');
-    const child = document.createElement('div');
+    const parent = el('auto', 400, 100);
+    const child = el('visible', 50, 50);
     parent.appendChild(child);
-    Object.defineProperty(parent, 'scrollHeight', { value: 400 });
-    Object.defineProperty(parent, 'clientHeight', { value: 100 });
-    parent.scrollTop = 0;
-    vi.spyOn(window, 'getComputedStyle').mockImplementation((el) => {
-      if (el === parent) {
-        return { overflowY: 'auto' } as CSSStyleDeclaration;
-      }
-      return { overflowY: 'visible' } as CSSStyleDeclaration;
-    });
 
-    expect(forwardWheelToAncestor(child, 40)).toBe(true);
+    expect(forwardWheelToAncestor(asHtml(child), 40)).toBe(true);
     expect(parent.scrollTop).toBe(40);
   });
 
   it('returns false when no scrollable ancestor exists', () => {
-    const orphan = document.createElement('div');
-    vi.spyOn(window, 'getComputedStyle').mockReturnValue({
-      overflowY: 'visible',
-    } as CSSStyleDeclaration);
-    expect(forwardWheelToAncestor(orphan, 20)).toBe(false);
+    const orphan = el('visible', 50, 50);
+    expect(forwardWheelToAncestor(asHtml(orphan), 20)).toBe(false);
   });
 });
 
 describe('attachForwardWheel', () => {
-  afterEach(() => {
-    vi.restoreAllMocks();
-  });
-
   it('forwards wheel when the element cannot scroll', () => {
-    const parent = document.createElement('div');
-    const child = document.createElement('div');
+    const parent = el('auto', 400, 100);
+    const child = el('visible', 50, 50);
     parent.appendChild(child);
-    Object.defineProperty(parent, 'scrollHeight', { value: 400 });
-    Object.defineProperty(parent, 'clientHeight', { value: 100 });
-    Object.defineProperty(child, 'scrollHeight', { value: 50 });
-    Object.defineProperty(child, 'clientHeight', { value: 50 });
-    parent.scrollTop = 0;
 
-    vi.spyOn(window, 'getComputedStyle').mockImplementation((el) => {
-      if (el === parent) {
-        return { overflowY: 'auto' } as CSSStyleDeclaration;
-      }
-      return { overflowY: 'visible' } as CSSStyleDeclaration;
-    });
-
-    const detach = attachForwardWheel(child);
-    const event = new WheelEvent('wheel', { deltaY: 25, bubbles: true });
-    const prevent = vi.spyOn(event, 'preventDefault');
+    const detach = attachForwardWheel(asHtml(child));
+    const prevent = vi.fn();
+    const event: TestWheelEvent = {
+      type: 'wheel',
+      deltaY: 25,
+      ctrlKey: false,
+      preventDefault: prevent,
+      composedPath: () => [child, parent],
+    };
     child.dispatchEvent(event);
 
     expect(parent.scrollTop).toBe(25);
