@@ -31,7 +31,7 @@ const validFindings = {
         'Reword with JD/ATS terms already on the resume, else remove',
       fixItSuggestion: {
         advice:
-          'Collapse the Harbor & Pine role header + inventory bullet into one Earlier Experience line using only facts already listed.',
+          'Collapse the Harbor & Pine inventory bullet into one Earlier Experience line using only facts already listed.',
         draftText:
           'Earlier Experience: Store Manager — Harbor & Pine Outfitters — managed 22-person team; owned inventory forecasting and vendor coordination.',
       },
@@ -40,7 +40,7 @@ const validFindings = {
   recruiterSearchQueries: [
     {
       booleanQuery: '"TypeScript" AND "Next.js" AND "payments"',
-      wouldAppearOnPage1: false,
+      wouldMatch: false,
       missingExactTerm: 'TypeScript',
     },
   ],
@@ -112,6 +112,32 @@ describe('AnalysisFindingsSchema', () => {
               'On the Skills line, replace only "JS/TS" with "TypeScript".',
             draftText:
               'TypeScript, React, Next.js, HTML/CSS, WordPress, WooCommerce, Shopify, retail operations, team leadership, merchandising, customer service, GraphQL, Jest',
+          },
+        },
+      ],
+    });
+    expect(parsed.success).toBe(true);
+  });
+
+  it('accepts Fix-it on warning near-miss knockouts', () => {
+    const firstRule = validFindings.knockoutRules[0];
+    expect(firstRule).toBeDefined();
+    if (!firstRule) return;
+
+    const parsed = AnalysisFindingsSchema.safeParse({
+      ...validFindings,
+      knockoutRules: [
+        {
+          ...firstRule,
+          rule: 'Explicit 0-to-1 product ownership (greenfield or new product line)',
+          status: 'warning',
+          evidenceOrGap:
+            'Led cross-functional delivery of a new checkout upsell module used by 180k monthly shoppers',
+          fixItSuggestion: {
+            advice:
+              'Your new checkout upsell module bullet is close to what they call 0-to-1. Check if 0-to-1 actually suits your experience, and if you decide that it does, rewrite it with that term and keep all the other facts the same.',
+            draftText:
+              'Led 0-to-1 delivery of a new checkout upsell module used by 180k monthly shoppers',
           },
         },
       ],

@@ -31,6 +31,9 @@ export function FixItTip({ advice, draftText, copyKey }: FixItTipProps) {
           <p className="mb-1 text-[10px] font-semibold uppercase tracking-wider text-emerald-400/80">
             Suggestions
           </p>
+          <p className="mb-2 break-words text-[11px] leading-snug text-emerald-200/70">
+            Paste only if this matches work you have actually done.
+          </p>
           <div className="relative min-w-0 rounded-md border border-emerald-500/20 bg-zinc-950/50">
             <button
               type="button"

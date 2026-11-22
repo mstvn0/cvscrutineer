@@ -58,7 +58,7 @@ export function CvScrutineerApp() {
       <div className="mx-auto flex w-full max-w-[1600px] min-h-0 min-w-0 flex-1 flex-col overflow-y-auto lg:flex-row lg:overflow-hidden">
         {/* Results first on small screens (higher); input stays left on desktop. */}
         <section
-          className="order-1 flex w-full min-h-[18rem] min-w-0 flex-1 flex-col overflow-hidden border-b border-zinc-800 bg-[#09090b] lg:order-2 lg:min-h-0 lg:border-b-0"
+          className="order-1 flex w-full min-h-[18rem] min-w-0 shrink-0 flex-col border-b border-zinc-800 bg-[#09090b] lg:order-2 lg:min-h-0 lg:flex-1 lg:shrink lg:overflow-hidden lg:border-b-0"
           aria-label="Forensics dashboard"
         >
           {status === 'idle' || status === 'error' ? (

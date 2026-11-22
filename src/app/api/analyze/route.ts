@@ -47,7 +47,7 @@ ${resume}
 Return structured findings only (no probabilities or numeric scores).`,
     });
 
-    return Response.json(withDerivedVerdict(object));
+    return Response.json(withDerivedVerdict(object, resume));
   } catch (error) {
     if (APICallError.isInstance(error) && error.statusCode === 429) {
       return jsonError(

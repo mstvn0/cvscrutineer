@@ -1,3 +1,4 @@
+import { reconcileBooleanMatches } from '@/lib/booleanMatch';
 import type {
   AnalysisFindings,
   KnockoutStatus,
@@ -14,7 +15,7 @@ export type VerdictResult = {
  *
  * LIKELY_REJECTED — any hard knockout failed (auto-reject before human review)
  * AT_RISK — no hard fails, but warnings, diluting sections, or Boolean misses
- * PASS — all knockouts met, no diluting vectors, all Boolean queries on page 1
+ * PASS — all knockouts met, no diluting vectors, all Boolean queries would match
  */
 export function deriveVerdict(findings: AnalysisFindings): VerdictResult {
   const failedKnockoutCount = findings.knockoutRules.filter(
@@ -27,7 +28,7 @@ export function deriveVerdict(findings: AnalysisFindings): VerdictResult {
     (row) => row.driftDiagnosis === 'Diluting Vector',
   ).length;
   const missedBooleanCount = findings.recruiterSearchQueries.filter(
-    (query) => !query.wouldAppearOnPage1,
+    (query) => !query.wouldMatch,
   ).length;
 
   if (failedKnockoutCount > 0) {
@@ -85,14 +86,19 @@ export function deriveVerdict(findings: AnalysisFindings): VerdictResult {
       dilutingSectionCount: 0,
       missedBooleanCount: 0,
       classificationRule:
-        'All knockout rules met, no diluting sections, and every recruiter Boolean query would hit page 1.',
+        'All knockout rules met, no diluting sections, and every recruiter Boolean query would match.',
     },
   };
 }
 
-/** Merge LLM findings with the deterministic verdict gate. */
+/**
+ * Reconcile Boolean exact-term matches against the resume, then attach the
+ * deterministic verdict gate.
+ */
 export function withDerivedVerdict(
   findings: AnalysisFindings,
+  resume: string,
 ): AnalysisFindings & VerdictResult {
-  return { ...findings, ...deriveVerdict(findings) };
+  const reconciled = reconcileBooleanMatches(findings, resume);
+  return { ...reconciled, ...deriveVerdict(reconciled) };
 }

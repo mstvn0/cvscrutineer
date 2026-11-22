@@ -47,7 +47,7 @@ export function AtsParsedPanel({ profile }: AtsParsedPanelProps) {
       </div>
 
       {warnings.length > 0 ? (
-        <ul className="mt-2 max-h-16 min-w-0 space-y-1 overflow-y-auto overscroll-contain [scrollbar-width:thin] [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-zinc-600">
+        <ul className="mt-2 max-h-16 min-w-0 space-y-1 overflow-y-auto overscroll-y-contain [scrollbar-width:thin] [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-zinc-600">
           {warnings.map((warning) => (
             <li
               key={warning}

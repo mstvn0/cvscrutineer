@@ -38,7 +38,7 @@ function analysis(
     recruiterSearchQueries: [
       {
         booleanQuery: '"React"',
-        wouldAppearOnPage1: true,
+        wouldMatch: true,
         missingExactTerm: null,
       },
     ],

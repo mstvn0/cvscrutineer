@@ -18,7 +18,7 @@ export const SAMPLE_SCENARIOS: SampleScenario[] = [
     label: 'Sample 1: Senior Frontend Engineer (Vector Drift Trap)',
     tagline: 'Strong React/Next.js signal drowned by retail + WordPress fluff',
     trapFocus:
-      'Lengthy unrelated retail management, freelance WordPress gigs, passive verbs, and "JS/TS" instead of "TypeScript" dilute semantic relevance and fail seniority knockouts.',
+      'Lengthy unrelated retail management, freelance WordPress gigs, passive verbs, and "JS/TS" instead of "TypeScript" dilute semantic relevance and miss required seniority signals.',
     resume: `Jordan Hale
 jordan.hale@email.com | (415) 555-0187 | linkedin.com/in/jordanhale | github.com/jhale-dev | jordanhale.dev
 San Francisco, CA 94107 | 1842 Market Street, Apt 6B
@@ -74,35 +74,33 @@ JS/TS, React, Next.js, HTML/CSS, WordPress, WooCommerce, Shopify, retail operati
 About the role
 We are hiring a Senior Frontend Engineer to own customer-facing payment and billing experiences in a high-compliance fintech environment. You will partner with Product and Design to ship TypeScript-first React/Next.js interfaces that move real money safely.
 
-Must-haves (knockout)
+Responsibilities
+- Own customer-facing payment and billing UI end-to-end with Product and Design
+- Build and evolve shared React/Next.js component libraries used across product surfaces
+- Write and maintain unit and end-to-end tests for critical payment flows
+- Mentor mid and junior engineers through design reviews and code review
+
+Required qualifications
 - 5+ years professional frontend engineering experience
-- Expert TypeScript (not "JS familiarity") in production React codebases
+- Expert TypeScript in production React codebases (not only general JavaScript familiarity)
 - Production Next.js experience (App Router preferred)
-- Demonstrated ownership of complex product surfaces (not ticket-taker work)
-- Experience with design systems / shared component libraries
-- Strong testing discipline (unit + e2e)
-- Clear, active-voice communication of impact and metrics
+- Demonstrated ownership of complex product surfaces
+- Experience with design systems or shared component libraries
+- Strong testing discipline (unit and e2e)
+- Clear communication of impact and outcomes in your work history
 
-Nice-to-haves
-- Payments, billing, or fintech domain exposure
-- GraphQL clients, accessibility (WCAG), Playwright
-- Mentorship of mid/junior engineers
-
-What we screen out
-- Pure WordPress / theme-shop freelance as primary signal
-- Retail or non-software management as the bulk of the resume
-- Passive descriptions ("helped with", "assisted in") without ownership or outcomes
-- Acronym-only skill lists that omit TypeScript explicitly
-
-Recruiter Boolean (approx.)
-("Senior Frontend" OR "Staff Frontend") AND TypeScript AND (React AND Next.js) AND (payments OR billing OR fintech)`,
+Preferred qualifications
+- Payments, billing, or fintech domain experience
+- GraphQL clients, accessibility (WCAG), and Playwright
+- Experience mentoring mid or junior engineers
+`,
   },
   {
     id: 'product-manager-knockout-synonym',
-    label: 'Sample 2: Product Manager (Knockout & Synonym Trap)',
-    tagline: 'Strong PM story that still misses Boolean knockout phrases',
+    label: 'Sample 2: Product Manager (Keyword & Synonym Trap)',
+    tagline: 'Strong PM story that still misses exact required phrases',
     trapFocus:
-      'Resume describes launching features and analyzing user behavior but omits exact JD knockouts like "0-to-1 product ownership", "SQL", and "A/B experimentation", so recruiter Boolean searches never surface the candidate.',
+      'Resume describes launching features and analyzing user behavior but omits exact required phrases like "0-to-1 product ownership", "SQL", and "A/B experimentation".',
     resume: `Alex Rivera
 alex.rivera@email.com | +1-646-555-0142 | linkedin.com/in/alexriverapm | alexrivera.pm
 Brooklyn, NY 11201 | 88 Pierrepont Street
@@ -142,24 +140,26 @@ Roadmapping, PRDs, stakeholder management, Amplitude, Mixpanel, Looker, user int
     jobDescription: `Product Manager — 0-to-1 Growth Platform
 
 About the role
-We need a Product Manager who has taken ambiguous problems from idea to shipped product ("0-to-1 product ownership") and who is fluent in quantitative discovery.
+We need a Product Manager who has taken ambiguous problems from idea to shipped product (0-to-1 product ownership) and who is fluent in quantitative discovery. You will partner with engineering, design, and data science to prioritize and ship growth experiments.
 
-Knockout requirements (auto-reject if missing)
+Responsibilities
+- Define and ship new product surfaces from ambiguous problem statements
+- Design and interpret A/B experiments with clear hypotheses and success metrics
+- Partner with data science and engineering on instrumentation and funnel analysis
+- Write crisp product narratives and roadmaps for executive stakeholders
+
+Required qualifications
 - Explicit 0-to-1 product ownership (greenfield or new product line, not only iterating existing surfaces)
-- Hands-on SQL for self-serve analysis (joins, funnels, cohort pulls) — not solely BI-tool consumption
-- A/B experimentation literacy: hypothesis design, guardrails, interpreting statistical results
+- Hands-on SQL for self-serve analysis (joins, funnels, cohort pulls)—not solely BI-tool consumption
+- A/B experimentation literacy: hypothesis design, guardrails, and interpreting statistical results
 - 4+ years PM experience in B2B or marketplace environments
 - Comfort partnering with data science and engineering on instrumentation
 
-Preferred
-- Growth / monetization domain
-- Experience with Amplitude or similar + the ability to validate findings in SQL
-- Crisp narrative writing for exec stakeholders
-
-How recruiters search our ATS
-("Product Manager" OR "PM") AND ("0-to-1" OR "0 to 1" OR "zero to one") AND SQL AND ("A/B" OR "experimentation" OR "AB test")
-
-Candidates who only say "launched features", "analyzed user behavior", or "ran experiments with marketing" without the exact knockout terms above often never appear on page 1 of Boolean results — even when the underlying experience is relevant.`,
+Preferred qualifications
+- Growth or monetization domain experience
+- Experience with Amplitude or similar, plus the ability to validate findings in SQL
+- Strong written communication for executive audiences
+`,
   },
 ];
 

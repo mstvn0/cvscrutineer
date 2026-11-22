@@ -23,7 +23,7 @@ export function RecruiterTab({
 
   const visible =
     focus === 'misses'
-      ? queries.filter((query) => !query.wouldAppearOnPage1)
+      ? queries.filter((query) => query.wouldMatch === false)
       : queries;
 
   if (visible.length === 0) {
@@ -37,7 +37,7 @@ export function RecruiterTab({
   return (
     <ul className="min-w-0 space-y-3">
       {visible.map((query, index) => {
-        const onPage1 = query.wouldAppearOnPage1;
+        const wouldMatch = query.wouldMatch;
         return (
           <li
             key={`${query.booleanQuery}-${index}`}
@@ -49,23 +49,23 @@ export function RecruiterTab({
               </span>
               <span
                 className={`inline-flex shrink-0 items-center gap-1.5 rounded-full px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide ${
-                  onPage1
+                  wouldMatch
                     ? 'bg-emerald-500/15 text-emerald-300'
                     : 'bg-rose-500/15 text-rose-300'
                 }`}
               >
-                {onPage1 ? (
+                {wouldMatch ? (
                   <ListChecks className="h-3 w-3" aria-hidden />
                 ) : (
                   <FilterX className="h-3 w-3" aria-hidden />
                 )}
-                {onPage1 ? 'Page 1 Match' : 'Filtered Out'}
+                {wouldMatch ? 'Would Match' : 'Filtered Out'}
               </span>
             </div>
             <pre className="max-w-full overflow-x-auto whitespace-pre-wrap break-all px-3 py-3 font-mono text-sm leading-relaxed text-emerald-300/90">
               {query.booleanQuery}
             </pre>
-            {!onPage1 && query.missingExactTerm ? (
+            {!wouldMatch && query.missingExactTerm ? (
               <div className="min-w-0 border-t border-zinc-800/80 px-3 py-2">
                 <button
                   type="button"

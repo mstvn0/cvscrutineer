@@ -93,7 +93,7 @@ function KnockoutRow({ rule, index }: { rule: Rule; index: number }) {
   const Icon = ui.icon;
   const tip = rule.fixItSuggestion;
   const showFixIt =
-    rule.status === 'failed' &&
+    (rule.status === 'failed' || rule.status === 'warning') &&
     tip !== null &&
     tip.advice.trim().length > 0;
 

@@ -33,7 +33,7 @@ function baseFindings(
     recruiterSearchQueries: [
       {
         booleanQuery: '"TypeScript" AND "React"',
-        wouldAppearOnPage1: true,
+        wouldMatch: true,
         missingExactTerm: null,
       },
     ],
@@ -90,7 +90,7 @@ describe('deriveVerdict', () => {
         recruiterSearchQueries: [
           {
             booleanQuery: 'SQL AND PM',
-            wouldAppearOnPage1: false,
+            wouldMatch: false,
             missingExactTerm: 'SQL',
           },
         ],
@@ -149,7 +149,7 @@ describe('deriveVerdict', () => {
         recruiterSearchQueries: [
           {
             booleanQuery: '"0-to-1" AND SQL',
-            wouldAppearOnPage1: false,
+            wouldMatch: false,
             missingExactTerm: '0-to-1',
           },
         ],
@@ -161,9 +161,29 @@ describe('deriveVerdict', () => {
 
   it('withDerivedVerdict attaches status without mutating findings fields', () => {
     const findings = baseFindings();
-    const full = withDerivedVerdict(findings);
+    const full = withDerivedVerdict(
+      findings,
+      'Expert TypeScript and React engineer',
+    );
     expect(full.executiveSummary).toBe(findings.executiveSummary);
     expect(full.knockoutStatus).toBe('PASS');
     expect(full.verdictBreakdown.missedBooleanCount).toBe(0);
+  });
+
+  it('withDerivedVerdict corrects false Boolean matches when TypeScript is missing', () => {
+    const findings = baseFindings({
+      recruiterSearchQueries: [
+        {
+          booleanQuery: '"TypeScript" AND "React"',
+          wouldMatch: true,
+          missingExactTerm: null,
+        },
+      ],
+    });
+    const full = withDerivedVerdict(findings, 'Skills: JS/TS, React, Next.js');
+    expect(full.recruiterSearchQueries[0]?.wouldMatch).toBe(false);
+    expect(full.recruiterSearchQueries[0]?.missingExactTerm).toBe('TypeScript');
+    expect(full.knockoutStatus).toBe('AT_RISK');
+    expect(full.verdictBreakdown.missedBooleanCount).toBe(1);
   });
 });

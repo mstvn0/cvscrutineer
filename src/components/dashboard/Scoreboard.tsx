@@ -1,5 +1,6 @@
 'use client';
 
+import { useForwardWheelScroll } from '@/hooks/useForwardWheelScroll';
 import type { GateMetricKey } from '@/lib/dashboardNavigation';
 import type { AnalysisResult } from '@/lib/schemas/analysis';
 import { AtsParsedPanel } from './AtsParsedPanel';
@@ -12,9 +13,10 @@ type ScoreboardProps = {
 
 export function Scoreboard({ analysis, onGateNavigate }: ScoreboardProps) {
   const { executiveSummary } = analysis;
+  const wheelRef = useForwardWheelScroll<HTMLDivElement>();
 
   return (
-    <div className="@container min-w-0 space-y-2">
+    <div ref={wheelRef} className="@container min-w-0 space-y-2">
       <div className="grid min-w-0 gap-2 @2xl:grid-cols-2 @2xl:items-stretch">
         <div className="min-w-0">
           <VerdictPanel analysis={analysis} onGateNavigate={onGateNavigate} />

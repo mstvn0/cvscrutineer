@@ -73,12 +73,12 @@ export function ResultsDashboard({ analysis }: ResultsDashboardProps) {
   });
 
   return (
-    <div className="flex h-full min-h-0 min-w-0 flex-col gap-2 overflow-hidden p-3 lg:gap-2.5 lg:p-4">
+    <div className="flex min-w-0 flex-col gap-2 p-3 max-lg:h-auto max-lg:overflow-visible lg:h-full lg:min-h-0 lg:gap-2.5 lg:overflow-hidden lg:p-4">
       <div className="min-w-0 shrink-0">
         <Scoreboard analysis={analysis} onGateNavigate={handleGateNavigate} />
       </div>
 
-      <div className="flex min-h-[14rem] min-w-0 flex-1 flex-col overflow-hidden rounded-xl border border-zinc-800 bg-[#09090b]">
+      <div className="flex min-w-0 flex-col rounded-xl border border-zinc-800 bg-[#09090b] max-lg:min-h-[18rem] lg:min-h-[14rem] lg:flex-1 lg:overflow-hidden">
         <div className="min-w-0 shrink-0 border-b border-zinc-800 px-2.5 pt-2 pb-1.5">
           <TabBar active={tab} onChange={handleTabChange} analysis={analysis} />
         </div>
@@ -86,7 +86,7 @@ export function ResultsDashboard({ analysis }: ResultsDashboardProps) {
         <ScrollHintPanel
           aria-label={tab}
           onScrollTopReady={handleScrollTopReady}
-          className="p-2.5 pt-2"
+          className="p-2.5 pt-2 max-lg:flex-none"
         >
           {filterLabel ? (
             <FocusFilterBanner label={filterLabel} onClear={clearFocus} />

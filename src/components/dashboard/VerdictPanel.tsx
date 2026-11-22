@@ -32,7 +32,7 @@ const CRITERIA = [
   },
 ] as const;
 
-/** One-line blurbs — same height per entry; truncate if the pane is narrow. */
+/** Compact blurbs for the gate legend. */
 const GATE_LEGEND = [
   {
     status: 'LIKELY_REJECTED',
@@ -47,7 +47,7 @@ const GATE_LEGEND = [
   {
     status: 'PASS',
     tone: 'text-emerald-300',
-    body: 'All knockouts met; no diluting; Booleans on page 1',
+    body: 'All knockouts met; no diluting; Boolean queries matched',
   },
 ] as const;
 
@@ -115,25 +115,15 @@ export function VerdictPanel({ analysis, onGateNavigate }: VerdictPanelProps) {
       </div>
 
       <ul
-        className="mt-2.5 min-w-0 space-y-1.5"
+        className="mt-2.5 grid min-w-0 grid-cols-[auto_minmax(0,1fr)] items-start gap-x-3 gap-y-1.5 text-[10px] leading-snug"
         aria-label="How gate status is decided"
       >
         {GATE_LEGEND.map((item) => (
-          <li
-            key={item.status}
-            className="flex min-w-0 items-center gap-2 text-[10px] leading-none"
-          >
-            <span
-              className={`w-[8.25rem] shrink-0 font-medium tracking-wide ${item.tone}`}
-            >
+          <li key={item.status} className="contents">
+            <span className={`font-medium tracking-wide ${item.tone}`}>
               {item.status}
             </span>
-            <span
-              className="min-w-0 flex-1 truncate text-zinc-500"
-              title={item.body}
-            >
-              {item.body}
-            </span>
+            <span className="break-words text-zinc-500">{item.body}</span>
           </li>
         ))}
       </ul>

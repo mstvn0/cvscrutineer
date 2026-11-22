@@ -9,6 +9,7 @@ import {
   type UIEvent,
 } from 'react';
 import { ChevronDown } from 'lucide-react';
+import { attachForwardWheel } from '@/lib/forwardWheelScroll';
 
 type ScrollHintPanelProps = {
   children: ReactNode;
@@ -55,6 +56,8 @@ export function ScrollHintPanel({
 
     schedule();
 
+    const detachWheel = attachForwardWheel(el);
+
     const resizeObserver = new ResizeObserver(schedule);
     resizeObserver.observe(el);
     if (el.parentElement) {
@@ -68,6 +71,7 @@ export function ScrollHintPanel({
     window.visualViewport?.addEventListener('resize', schedule);
 
     return () => {
+      detachWheel();
       resizeObserver.disconnect();
       window.removeEventListener('resize', schedule);
       window.visualViewport?.removeEventListener('resize', schedule);
@@ -86,10 +90,12 @@ export function ScrollHintPanel({
   }
 
   return (
-    <div className={`relative min-h-0 min-w-0 flex-1 ${className}`}>
+    <div
+      className={`relative min-h-0 min-w-0 flex-1 max-lg:h-auto max-lg:flex-none ${className}`}
+    >
       {canScrollUp ? (
         <div
-          className="pointer-events-none absolute inset-x-0 top-0 z-10 h-8 bg-gradient-to-b from-[#09090b] to-transparent"
+          className="pointer-events-none absolute inset-x-0 top-0 z-10 hidden h-8 bg-gradient-to-b from-[#09090b] to-transparent lg:block"
           aria-hidden
         />
       ) : null}
@@ -99,15 +105,15 @@ export function ScrollHintPanel({
         role="tabpanel"
         aria-label={ariaLabel}
         onScroll={handleScroll}
-        className={`h-full min-h-0 overflow-x-hidden overflow-y-auto overscroll-contain pr-1 [scrollbar-gutter:stable] [scrollbar-width:thin] [&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-zinc-600 [&::-webkit-scrollbar-track]:bg-zinc-900 ${
-          canScrollDown ? 'pb-14' : 'pb-1'
+        className={`min-h-0 overflow-x-hidden pr-1 [scrollbar-width:thin] max-lg:h-auto max-lg:overflow-y-visible max-lg:overscroll-auto lg:h-full lg:overflow-y-auto lg:overscroll-y-contain lg:[scrollbar-gutter:stable] [&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-zinc-600 [&::-webkit-scrollbar-track]:bg-zinc-900 ${
+          canScrollDown ? 'lg:pb-14' : 'pb-1'
         }`}
       >
         {children}
       </div>
 
       {canScrollDown ? (
-        <div className="pointer-events-none absolute inset-x-0 bottom-0 z-10 flex flex-col items-center justify-end pb-1">
+        <div className="pointer-events-none absolute inset-x-0 bottom-0 z-10 hidden flex-col items-center justify-end pb-1 lg:flex">
           <div
             className="h-12 w-full bg-gradient-to-t from-[#09090b] via-[#09090b]/95 to-transparent"
             aria-hidden

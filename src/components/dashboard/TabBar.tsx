@@ -5,6 +5,12 @@ import { DASHBOARD_TABS, type DashboardTabId } from '@/lib/constants';
 import { tabSeverity } from '@/lib/dashboardNavigation';
 import type { AnalysisResult } from '@/lib/schemas/analysis';
 
+const SHORT_TAB_LABELS: Record<DashboardTabId, string> = {
+  knockouts: 'Knockouts',
+  drift: 'Drift',
+  recruiter: 'Boolean',
+};
+
 type TabBarProps = {
   active: DashboardTabId;
   onChange: (id: DashboardTabId) => void;
@@ -57,7 +63,12 @@ export function TabBar({ active, onChange, analysis }: TabBarProps) {
                 : 'bg-zinc-900 text-zinc-400 hover:bg-zinc-800 hover:text-zinc-200'
             }`}
           >
-            <span className="whitespace-nowrap">{tab.label}</span>
+            <span className="whitespace-nowrap sm:hidden">
+              {SHORT_TAB_LABELS[tab.id]}
+            </span>
+            <span className="hidden whitespace-nowrap sm:inline">
+              {tab.label}
+            </span>
             <SeverityBadges severity={severity} selected={selected} />
           </button>
         );
